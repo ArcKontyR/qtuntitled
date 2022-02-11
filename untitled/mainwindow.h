@@ -129,17 +129,14 @@ private:
     qreal m_yLim;
     qreal m_xMin;
     bool isYMinZero;
-    void updateTables();
+    void connectSignals();
 
 private slots:
+
+    void updateTables();
     void on_pbAddMap_clicked();
-    void progressBarDisable();
+    //void progressBarDisable();
     void on_pbDBSave_clicked();
-    void setMapPath();
-    void onMapProgressChanged(int progress);
-    void onMapProgressBarVisibilityChanged();
-    void onMapCoordCountValueChanged(int coords);
-    void clearMapFromPath();
     void openTable();
     void on_pbSetChart_clicked();
     void on_pbSaveFile_clicked();
@@ -154,8 +151,25 @@ private slots:
     void on_tvSqlTable_Tables_doubleClicked(const QModelIndex &index);
 
     void on_sbMapCoordDensityValue_valueChanged(double arg1);
-
     void on_pbDbTableChangeDescription_clicked();
+
+    int countSelectQueryRows(QSqlQuery *query);
+    int countInsertQueryRows(QFile *file);
+
+    void setMapPath();
+    void clearMapFromPath();
+    void onMapDrawingProgressChanged(int progress);
+    void onMapDrawingProgressBarVisibilityChanged();
+    void onMapCoordCountValueChanged(int coords);
+
+    void setChart();
+    void onChartDrawingProgressChanged(int progress);
+    void onChartDrawingProgressBarVisibilityChanged();
+    void onChartPointsValueChanged(int coords);
+
+    void saveDB(int _numberOfRows, QString _fileName, QString _description);
+    void onDBProgressChanged(int progress);
+    void onDBProgressBarVisibilityChanged();
 
 signals:
     void setMapCoordinate(double latitude, double longitude);
@@ -164,9 +178,21 @@ signals:
     void clearMapCoordinates();
     void setMapType(int typeValue);
 
-    void setMapProgress(int progress);
-    void setMapProgressDisabled();
+    void open();
+
+    void setMapDrawingProgress(int progress);
+    void setMapDrawingProgressDisabled();
     void setMapCoordCountValue(int coords);
+
+
+    void clearChart();
+    void setChartDrawingProgress(int progress);
+    void setChartDrawingProgressDisabled();
+    void setChartPointsValue(int coords);
+
+    void update();
+    void setDBProgress(int progress);
+    void setDBProgressDisabled();
 };
 
 #endif // MAINWINDOW_H

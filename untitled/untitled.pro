@@ -15,15 +15,13 @@ SOURCES += \
     chartview.cpp \
     filedialog.cpp \
     main.cpp \
-    mainwindow.cpp \
-    moveitem.cpp
+    mainwindow.cpp
 
 HEADERS += \
     chart.h \
     chartview.h \
     filedialog.h \
-    mainwindow.h \
-    moveitem.h
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui
