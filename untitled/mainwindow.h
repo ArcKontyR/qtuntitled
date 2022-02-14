@@ -107,8 +107,8 @@ private:
     QString row;
     QString column;
     QString strSelect;
-
     QLineSeries *m_series;
+
     QValueAxis *m_axisX;
     QDateTimeAxis *m_daxisX;
     QValueAxis *m_axisY;
@@ -129,8 +129,6 @@ private:
     qreal m_yLim;
     qreal m_xMin;
     bool isYMinZero;
-    bool wasChecked;
-
     void connectSignals();
 
 private slots:
@@ -149,7 +147,7 @@ private slots:
     void on_sbMapCenterLatValue_valueChanged(double arg1);
     void on_sbMapCenterLonValue_valueChanged(double arg1);
     void on_sbMapZoomLevelValue_valueChanged(double arg1);
-    void on_cbMapType_currentIndexChanged(int index);
+    void on_comboBox_currentIndexChanged(int index);
     void on_tvSqlTable_Tables_doubleClicked(const QModelIndex &index);
 
     void on_sbMapCoordDensityValue_valueChanged(double arg1);
@@ -164,6 +162,7 @@ private slots:
     void onMapDrawingProgressBarVisibilityChanged();
     void onMapCoordCountValueChanged(int coords);
 
+    void setChart();
     void onChartDrawingProgressChanged(int progress);
     void onChartDrawingProgressBarVisibilityChanged();
     void onChartPointsValueChanged(int coords);
@@ -171,14 +170,6 @@ private slots:
     void saveDB(int _numberOfRows, QString _fileName, QString _description);
     void onDBProgressChanged(int progress);
     void onDBProgressBarVisibilityChanged();
-
-
-    void on_hsChartCountValue_valueChanged(int value);
-
-    void on_sbChartCount_valueChanged(int arg1);
-
-    void on_cbChartRow_currentIndexChanged(int index);
-
 
 signals:
     void setMapCoordinate(double latitude, double longitude);

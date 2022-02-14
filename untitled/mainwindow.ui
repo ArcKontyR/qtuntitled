@@ -286,7 +286,7 @@
        <double>1.900000000000000</double>
       </property>
      </widget>
-     <widget class="QLabel" name="lblMapType">
+     <widget class="QLabel" name="lblMapCenterLat_2">
       <property name="geometry">
        <rect>
         <x>1010</x>
@@ -299,7 +299,7 @@
        <string>Тип</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="cbMapType">
+     <widget class="QComboBox" name="comboBox">
       <property name="geometry">
        <rect>
         <x>1110</x>
@@ -434,6 +434,16 @@
      <attribute name="title">
       <string>График</string>
      </attribute>
+     <widget class="ChartView" name="chartView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1000</width>
+        <height>531</height>
+       </rect>
+      </property>
+     </widget>
      <widget class="QComboBox" name="cbChartRow">
       <property name="geometry">
        <rect>
@@ -682,8 +692,8 @@
      <widget class="QPushButton" name="pbSetChart">
       <property name="geometry">
        <rect>
-        <x>1010</x>
-        <y>440</y>
+        <x>1009</x>
+        <y>70</y>
         <width>311</width>
         <height>25</height>
        </rect>
@@ -726,8 +736,8 @@
      <widget class="QPushButton" name="pbDeleteChart">
       <property name="geometry">
        <rect>
-        <x>1010</x>
-        <y>470</y>
+        <x>1009</x>
+        <y>100</y>
         <width>311</width>
         <height>25</height>
        </rect>
@@ -744,8 +754,8 @@
      <widget class="QLabel" name="lblChartPointsValue">
       <property name="geometry">
        <rect>
-        <x>1130</x>
-        <y>410</y>
+        <x>1110</x>
+        <y>130</y>
         <width>71</width>
         <height>25</height>
        </rect>
@@ -758,7 +768,7 @@
       <property name="geometry">
        <rect>
         <x>1010</x>
-        <y>410</y>
+        <y>130</y>
         <width>91</width>
         <height>25</height>
        </rect>
@@ -798,123 +808,6 @@
       </property>
       <property name="format">
        <string>%p%</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="lblChartcount">
-      <property name="geometry">
-       <rect>
-        <x>1010</x>
-        <y>70</y>
-        <width>111</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Кол-во графиков</string>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="gbCharts">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1000</width>
-        <height>531</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-      <widget class="ChartView" name="chartViewFirst">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>1000</width>
-         <height>531</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="ChartView" name="chartViewSecond">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>0</width>
-         <height>0</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="ChartView" name="chartViewThird">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>0</width>
-         <height>0</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="ChartView" name="chartViewFourth">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>0</width>
-         <height>0</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QSpinBox" name="sbChartCount">
-      <property name="geometry">
-       <rect>
-        <x>1130</x>
-        <y>70</y>
-        <width>191</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>4</number>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="chbChartFixAxisX">
-      <property name="geometry">
-       <rect>
-        <x>1010</x>
-        <y>100</y>
-        <width>151</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Зафиксировать ось X</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="chbChartFixAxisY">
-      <property name="geometry">
-       <rect>
-        <x>1170</x>
-        <y>100</y>
-        <width>151</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Зафиксировать ось Y</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
       </property>
      </widget>
     </widget>
