@@ -24,10 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     db = QSqlDatabase::addDatabase("QSQLITE","mainConnection");
     db.setDatabaseName("database.sqlite");
-
-    if (!db.open()) {
-        qDebug() << "Cannot open database:" << db.lastError();
-    }
+    db.open();
 
     emit update();
     /*--Установка списков--*/
@@ -135,33 +132,6 @@ MainWindow::MainWindow(QWidget *parent)
     context->setContextProperty(QStringLiteral("main"), this);
     setMapInfo(56.394, 61.9334, 12);
 
-    /*--Настройка графиков--*/
-
-    chart = new Chart();
-    chart->legend()->hide();
-    chart->setTitle("Blank chart");
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-    chart->setDropShadowEnabled(false);
-
-    ui->chartViewFirst->setRenderHint(QPainter::Antialiasing);
-    ui->chartViewFirst->setChart(chart);
-    ui->chartViewFirst->setRubberBand(QChartView::VerticalRubberBand);
-
-    ui->chartViewSecond->setVisible(false);
-    ui->chartViewSecond->setRenderHint(QPainter::Antialiasing);
-    //ui->chartViewSecond->setChart(chart);
-    ui->chartViewSecond->setRubberBand(QChartView::VerticalRubberBand);
-
-    ui->chartViewThird->setVisible(false);
-    ui->chartViewThird->setRenderHint(QPainter::Antialiasing);
-    //ui->chartViewThird->setChart(chart);
-    ui->chartViewThird->setRubberBand(QChartView::VerticalRubberBand);
-
-    ui->chartViewFourth->setVisible(false);
-    ui->chartViewFourth->setRenderHint(QPainter::Antialiasing);
-    //ui->chartViewFourth->setChart(chart);
-    ui->chartViewFourth->setRubberBand(QChartView::VerticalRubberBand);
-
     /*--Настройка прогресс бара--*/
 
     ui->prbrDBSave->setVisible(false);
@@ -177,13 +147,6 @@ void MainWindow::connectSignals() {
     connect(this, SIGNAL(setMapCoordCountValue(int)), this,
             SLOT(onMapCoordCountValueChanged(int)));
 
-    connect(this, SIGNAL(setChartDrawingProgress(int)), this,
-            SLOT(onChartDrawingProgressChanged(int)));
-    connect(this, SIGNAL(setChartDrawingProgressDisabled()), this,
-            SLOT(onChartDrawingProgressBarVisibilityChanged()));
-    connect(this, SIGNAL(setChartPointsValue(int)), this,
-            SLOT(onChartPointsValueChanged(int)));
-    //connect(this, SIGNAL(clearChart()), this, SLOT(on_pbDeleteChart_clicked()));
 
     connect(this, SIGNAL(setDBProgress(int)), this,
             SLOT(onDBProgressChanged(int)));
@@ -226,6 +189,7 @@ int MainWindow::countSelectQueryRows(QSqlQuery *query) {
         query->first();
         query->previous();
     }
+    emit setChartNumberOfRows(numberOfRows);
     return numberOfRows;
 }
 
@@ -692,7 +656,6 @@ void MainWindow::on_pbDBSave_clicked() {
     } else {
         return;
     }
-    // qDebug() << fileName;
     if (fileName == "") {
         return;
     }
@@ -741,180 +704,58 @@ void MainWindow::on_pbSetChart_clicked() {
     if (fileNameShort.isEmpty()) {
         return;
     }
-    QSqlQuery *query = new QSqlQuery(db);
-    row = "";
-    column = "";
-    strSelect = "";
-    m_series = new QLineSeries;
-    m_axisX = new QValueAxis;
-    m_daxisX = new QDateTimeAxis;
-    m_axisY = new QValueAxis;
-    m_x = 0;
-    m_y = 0;
-    xmin = 0;
-    xmax = 0;
-    ymin = 0;
-    ymax = 0;
-    m_dx.setTime(QTime(0, 0, 0, 0));
-    isIndex = false;
-    i = 0;
-    isIncrement = true;
-    shouldAppend = true;
-    m_yLim = 0;
-    isYMinZero = true;
-    int points = 0;
-    on_pbDeleteChart_clicked();
+    ChartView *chartView = new ChartView();
+    Chart *chart = new Chart();
+    connect(this, SIGNAL(clearChart()), chart, SLOT(clearChart()));
+    connect(this, SIGNAL(drawChart()), chart, SLOT(compute()));
+    connect(this, SIGNAL(setChartTableName(QString)), chart,
+            SLOT(setTableName(QString)));
+    connect(this, SIGNAL(setChartDatabase(QSqlDatabase)), chart,
+            SLOT(setDatabase(QSqlDatabase)));
+    connect(this, SIGNAL(setChartFixXChecked(bool)), chart,
+            SLOT(setFixXChecked(bool)));
+    connect(this, SIGNAL(setChartFixYChecked(bool)), chart,
+            SLOT(setFixYChecked(bool)));
+    connect(this, SIGNAL(setChartFixYChecked(bool)), chart,
+            SLOT(setFixYChecked(bool)));
+    connect(this, SIGNAL(setChartDBRow(QString)), chart,
+            SLOT(setDBRow(QString)));
+    connect(this, SIGNAL(setChartDBColumn(QString)), chart,
+            SLOT(setDBColumn(QString)));
+    connect(chart, SIGNAL(getNumberOfRows(QSqlQuery *)), this,
+            SLOT(countSelectQueryRows(QSqlQuery *)));
+    connect(this, SIGNAL(setChartNumberOfRows(int)), chart,
+            SLOT(setNumberOfRows(int)));
+    connect(chart, SIGNAL(setDrawingProgress(int)), this,
+            SLOT(onChartDrawingProgressChanged(int)));
+    connect(chart, SIGNAL(setDrawingProgressDisabled()), this,
+            SLOT(onChartDrawingProgressBarVisibilityChanged()));
+    connect(chart, SIGNAL(setPointsValue(int)), this,
+            SLOT(onChartPointsValueChanged(int)));
 
-    row = structListVarX.at(ui->cbChartRow->currentIndex());
-    column = structListVariables.at(ui->cbChartColumn->currentIndex());
-    if (row == "i") {
-        strSelect = "SELECT %1 FROM '%2'";
-        strSelect = strSelect.arg(column).arg(fileNameShort);
-    } else {
-        strSelect = "SELECT %1, %2 FROM '%3'";
-        strSelect = strSelect.arg(row).arg(column).arg(fileNameShort);
-    }
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "chartConnection");
+    _db.setDatabaseName("database.sqlite");
+    _db.open();
+    emit setChartDatabase(_db);
+    emit setChartTableName(fileNameShort);
+    emit setChartFixXChecked(ui->chbChartFixAxisX->isChecked());
+    emit setChartFixYChecked(ui->chbChartFixAxisY->isChecked());
+    emit setChartDBRow(structListVarX.at(ui->cbChartRow->currentIndex()));
+    emit setChartDBColumn(
+        structListVariables.at(ui->cbChartColumn->currentIndex()));
+    emit clearChart();
+    emit drawChart();
+    chartView->setChart(chart);
+    ui->glCharts->addWidget(chartView,0,0);
 
-    QPen pen(Qt::black);
-    pen.setWidth(1);
-    m_series->setPen(pen);
+    //chartViews.append(chartView);
+    //charts.append(chart);
 
-    query->exec(strSelect);
-    int numberOfRows = countSelectQueryRows(query);
-    while (query->next()) {
-        if (query->value(1).toString() == "") {
-            isIndex = true;
-            m_x = i;
-            m_y = query->value(0).toDouble();
-            //++i;
-            if (isIncrement) {
-                if (m_y > m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = false;
-                    shouldAppend = true;
-                }
-            } else {
-                if (m_y < m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = true;
-                    shouldAppend = true;
-                }
-            }
-            ++i;
-        } else {
-            m_x = query->value(0).toDouble();
-            QString num = query->value(0).toString();
-            if (num.length() == 8) {
-                m_dx.setTime(
-                    QTime(num.left(1).toInt(), num.left(3).right(2).toInt(),
-                          num.right(5).left(2).toInt(), num.right(3).toInt()));
-            } else if (num.length() == 9) {
-                m_dx.setTime(
-                    QTime(num.left(2).toInt(), num.left(4).right(2).toInt(),
-                          num.right(5).left(2).toInt(), num.right(3).toInt()));
-            }
-
-            m_y = query->value(1).toDouble();
-
-            if (isIncrement) {
-                if (m_y > m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = false;
-                    shouldAppend = true;
-                }
-            } else {
-                if (m_y < m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = true;
-                    shouldAppend = true;
-                }
-            }
-            ++i;
-        }
-
-        if (!qFuzzyCompare(m_y, 0) && isYMinZero) {
-            ymax = ymin = m_y;
-            isYMinZero = false;
-        }
-        if (m_x > xmax) {
-            xmax = m_x;
-        } else if (m_x < xmin) {
-            xmin = m_x;
-        }
-        if (m_y > ymax) {
-            ymax = m_y;
-        } else if (m_y < ymin) {
-            ymin = m_y;
-        }
-
-        if (shouldAppend) {
-            if (isIndex) {
-                m_series->append(m_x, m_yLim);
-            } else {
-                m_series->append(m_dx.toMSecsSinceEpoch(), m_yLim);
-            }
-            points++;
-            shouldAppend = false;
-            int progress = qCeil(100 * i / numberOfRows);
-            emit setChartDrawingProgress(progress);
-        }
-    }
-
-    query->~QSqlQuery();
-
-    if (isIndex) {
-        m_series->append(m_x, m_yLim);
-    } else {
-        m_series->append(m_dx.toMSecsSinceEpoch(), m_y);
-    }
-    points++;
-    shouldAppend = false;
-
-    ui->lblChartPointsValue->setText(QString::number(points));
-    chart->addSeries(m_series);
-    if (!isIndex) {
-        chart->addAxis(m_daxisX, Qt::AlignBottom);
-        QDateTime dxmin, dxmax;
-        int msmin = QString::number(xmin).right(3).toInt();
-        int smin = QString::number(xmin).right(5).left(2).toInt();
-        int mmin = QString::number(xmin).right(7).left(2).toInt();
-        int hmin = QString::number(xmin).right(9).left(2).toInt();
-        dxmin.setTime(QTime(hmin, mmin, smin, msmin));
-        int msmax = QString::number(xmax).right(3).toInt();
-        int smax = QString::number(xmax).right(5).left(2).toInt();
-        int mmax = QString::number(xmax).right(7).left(2).toInt();
-        int hmax = QString::number(xmax).right(9).left(2).toInt();
-        dxmax.setTime(QTime(hmax, mmax, smax, msmax));
-        m_daxisX->setFormat("hh:mm:ss.zzz");
-        m_daxisX->setRange(dxmin, dxmax);
-
-        m_series->attachAxis(m_daxisX);
-    } else {
-        chart->addAxis(m_axisX, Qt::AlignBottom);
-        m_axisX->setRange(xmin, xmax);
-        if (ui->chbChartFixAxisX->isChecked()) {
-            m_axisX->setTickType(QValueAxis::TicksDynamic);
-            m_axisX->setTickInterval(m_axisX->max() / m_axisX->tickCount());
-        }
-        m_series->attachAxis(m_axisX);
-    }
-    chart->addAxis(m_axisY, Qt::AlignLeft);
-    m_series->attachAxis(m_axisY);
-    if (ui->chbChartFixAxisY->isChecked()) {
-        m_axisY->setTickType(QValueAxis::TicksDynamic);
-        m_axisY->setTickInterval(m_axisY->max() / m_axisY->tickCount());
-    }
-    m_axisY->setRange(ymin, ymax);
-    chart->setTitle(row + "  " + column + " chart");
-
-    int progress = qCeil(100 * i / numberOfRows);
-    emit setChartDrawingProgress(progress);
-    emit setChartPointsValue(points);
-    emit setChartDrawingProgressDisabled();
+    disconnect(this, nullptr, chart, nullptr);
+    disconnect(chart, nullptr, this, nullptr);
+    //for (int a=0; a<chartViews.size(); a++){
+    //    qDebug() << chartViews[a]->chart()->title() << charts[a]->title();
+    //}
 }
 
 void MainWindow::onChartDrawingProgressChanged(int progress) {
@@ -932,22 +773,7 @@ void MainWindow::onChartPointsValueChanged(int coords) {
     ui->lblChartPointsValue->setText(QString::number(coords));
 }
 
-void MainWindow::on_pbDeleteChart_clicked() {
-    if (!chart->axes(Qt::Horizontal).isEmpty() &&
-        !chart->axes(Qt::Vertical).isEmpty() && !chart->series().isEmpty()) {
-        qDebug() << "should clear";
-        while (!chart->axes(Qt::Horizontal).isEmpty()) {
-            chart->removeAxis(chart->axes(Qt::Horizontal).first());
-        }
-        while (!chart->axes(Qt::Vertical).isEmpty()) {
-            chart->removeAxis(chart->axes(Qt::Vertical).first());
-        }
-        chart->removeAllSeries();
-
-        emit setChartPointsValue(0);
-
-    }
-    chart->setTitle("There's nothing left");
+void MainWindow::on_pbDeleteChart_clicked() { emit clearChart();
 }
 
 void MainWindow::on_pbSaveFile_clicked() {
@@ -958,7 +784,7 @@ void MainWindow::on_pbSaveFile_clicked() {
         //qDebug() << query->lastError();
     }
     //"	" - табуляция
-    i = 0;
+    int i = 0;
     QString fileName =
         QDateTime::currentDateTime().date().toString(Qt::ISODate) + "_" +
         QString::number(QTime::currentTime().hour()) + "-" +
@@ -1182,77 +1008,25 @@ void MainWindow::on_pbDbTableChangeDescription_clicked() {
     emit update();
 }
 
-
-void MainWindow::on_hsChartCountValue_valueChanged(int value) {}
-
-
 void MainWindow::on_sbChartCount_valueChanged(int arg1) {
-    switch (arg1) {
-    case 1:
-        ui->chartViewFirst->setGeometry(0, 0, ui->gbCharts->width(),
-                                        ui->gbCharts->height());
-        ui->chartViewSecond->setVisible(false);
-        ui->chartViewThird->setVisible(false);
-        ui->chartViewFourth->setVisible(false);
-        // ui->chartViewSecond->geometry().x() = ui->gbCharts->width() * 0.5f;
-        break;
-    case 2:
-        ui->chartViewFirst->setGeometry(0, ui->gbCharts->height() / 4,
-                                        ui->gbCharts->width() / 2,
-                                        ui->gbCharts->height() / 2);
-        ui->chartViewSecond->setVisible(true);
-        ui->chartViewSecond->setGeometry(
-            ui->chartViewFirst->width(), ui->gbCharts->height() / 4,
-            ui->gbCharts->width() / 2, ui->gbCharts->height() / 2);
-        ui->chartViewThird->setVisible(false);
-        ui->chartViewFourth->setVisible(false);
-        break;
-    case 3:
-        ui->chartViewFirst->setGeometry(0, 0, ui->gbCharts->width() / 2,
-                                        ui->gbCharts->height() / 2);
-        ui->chartViewSecond->setVisible(true);
-        ui->chartViewSecond->setGeometry(ui->chartViewFirst->width(), 0,
-                                         ui->gbCharts->width() / 2,
-                                         ui->gbCharts->height() / 2);
-        ui->chartViewThird->setVisible(true);
-        ui->chartViewThird->setGeometry(
-            ui->gbCharts->width() / 4, ui->gbCharts->height() / 2,
-            ui->gbCharts->width() / 2, ui->gbCharts->height() / 2);
-        ui->chartViewFourth->setVisible(false);
-        break;
-    case 4:
-        ui->chartViewFirst->setGeometry(0, 0, ui->gbCharts->width() / 2,
-                                        ui->gbCharts->height() / 2);
-        ui->chartViewSecond->setVisible(true);
-        ui->chartViewSecond->setGeometry(ui->chartViewFirst->width(), 0,
-                                         ui->gbCharts->width() / 2,
-                                         ui->gbCharts->height() / 2);
-        ui->chartViewThird->setVisible(true);
-        ui->chartViewThird->setGeometry(0, ui->gbCharts->height() / 2,
-                                        ui->gbCharts->width() / 2,
-                                        ui->gbCharts->height() / 2);
-        ui->chartViewFourth->setVisible(true);
-        ui->chartViewFourth->setGeometry(
-            ui->chartViewThird->width(), ui->gbCharts->height() / 2,
-            ui->gbCharts->width() / 2, ui->gbCharts->height() / 2);
-        break;
-    }
+
 }
 
 
 void MainWindow::on_cbChartRow_currentIndexChanged(int index) {
     if (ui->chbChartFixAxisX->isEnabled()) {
-        wasChecked = ui->chbChartFixAxisX->isChecked();
+        fixAxisXWasChecked = ui->chbChartFixAxisX->isChecked();
     }
     switch (index) {
     case 0:
         ui->chbChartFixAxisX->setEnabled(true);
-        ui->chbChartFixAxisX->setChecked(wasChecked);
+        ui->chbChartFixAxisX->setChecked(fixAxisXWasChecked);
         break;
     default:
         ui->chbChartFixAxisX->setEnabled(false);
-        ui->chbChartFixAxisX->setChecked(true);
+        ui->chbChartFixAxisX->setChecked(false);
         break;
     }
 }
+
 

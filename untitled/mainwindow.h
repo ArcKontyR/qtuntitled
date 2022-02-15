@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <chart.h>
+#include <chartview.h>
 #include <QtWidgets>
 #include <QtSql>
 #include <QtCharts>
@@ -77,9 +78,10 @@ private:
      Ui::MainWindow *ui;
     QGraphicsScene *scene;
     //QQuickWidget* m_quickWidget;
-    Chart *chart;
     QString fileName;
     QString fileNameShort;
+    QList<Chart*> charts;
+    QList<ChartView*> chartViews;
     const QString strTableQuery = "SELECT name FROM sqlite_master WHERE type = 'table'";
     const QString strMainTableCreate = "CREATE TABLE MainTable ("
                                        "name        TEXT,"
@@ -107,33 +109,11 @@ private:
     QString row;
     QString column;
     QString strSelect;
-
-    QLineSeries *m_series;
-    QValueAxis *m_axisX;
-    QDateTimeAxis *m_daxisX;
-    QValueAxis *m_axisY;
-
-    qreal m_x;
-    qreal m_y;
-    qreal m_xPrev;
-    qreal m_yPrev;
-    qreal xmin;
-    qreal xmax;
-    qreal ymin;
-    qreal ymax;
-    QDateTime m_dx;
-    bool isIndex;
-    long i;
-    bool isIncrement;
-    bool shouldAppend;
-    qreal m_yLim;
-    qreal m_xMin;
-    bool isYMinZero;
-    bool wasChecked;
+    bool fixAxisXWasChecked;
 
     void connectSignals();
 
-private slots:
+public slots:
 
     void updateTables();
     void on_pbAddMap_clicked();
@@ -155,7 +135,7 @@ private slots:
     void on_sbMapCoordDensityValue_valueChanged(double arg1);
     void on_pbDbTableChangeDescription_clicked();
 
-    int countSelectQueryRows(QSqlQuery *query);
+    int countSelectQueryRows(QSqlQuery*);
     int countInsertQueryRows(QFile *file);
 
     void setMapPath();
@@ -172,8 +152,6 @@ private slots:
     void onDBProgressChanged(int progress);
     void onDBProgressBarVisibilityChanged();
 
-
-    void on_hsChartCountValue_valueChanged(int value);
 
     void on_sbChartCount_valueChanged(int arg1);
 
@@ -193,14 +171,21 @@ signals:
     void setMapDrawingProgressDisabled();
     void setMapCoordCountValue(int coords);
 
-
+    void setChartDatabase(QSqlDatabase);
+    void setChartTableName(QString);
+    void setChartFixXChecked(bool);
+    void setChartFixYChecked(bool);
+    void setChartDBRow(QString);
+    void setChartDBColumn(QString);
+    void setChartNumberOfRows(int);
+    void drawChart();
     void clearChart();
-    void setChartDrawingProgress(int progress);
+    void setChartDrawingProgress(int);
     void setChartDrawingProgressDisabled();
-    void setChartPointsValue(int coords);
+    void setChartPointsValue(int);
 
     void update();
-    void setDBProgress(int progress);
+    void setDBProgress(int);
     void setDBProgressDisabled();
 };
 

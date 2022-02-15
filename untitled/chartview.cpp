@@ -6,6 +6,8 @@ ChartView::ChartView(QWidget *parent,Chart* chart)
 {
     setDragMode(QGraphicsView::NoDrag);
     this->setMouseTracking(true);
+    setRenderHint(QPainter::Antialiasing);
+    setRubberBand(QChartView::VerticalRubberBand);
 }
 
 void ChartView::mousePressEvent(QMouseEvent *event)
