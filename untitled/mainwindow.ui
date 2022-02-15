@@ -813,62 +813,6 @@
        <string>Кол-во графиков</string>
       </property>
      </widget>
-     <widget class="QGroupBox" name="gbCharts">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1000</width>
-        <height>531</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-      <widget class="ChartView" name="chartViewFirst">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>1000</width>
-         <height>531</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="ChartView" name="chartViewSecond">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>0</width>
-         <height>0</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="ChartView" name="chartViewThird">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>0</width>
-         <height>0</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="ChartView" name="chartViewFourth">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>0</width>
-         <height>0</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
      <widget class="QSpinBox" name="sbChartCount">
       <property name="geometry">
        <rect>
@@ -898,7 +842,7 @@
        <string>Зафиксировать ось X</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="chbChartFixAxisY">
@@ -914,7 +858,28 @@
        <string>Зафиксировать ось Y</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1001</width>
+        <height>531</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="glCharts"/>
+     </widget>
+     <widget class="QTableView" name="tvCharts">
+      <property name="geometry">
+       <rect>
+        <x>1010</x>
+        <y>210</y>
+        <width>311</width>
+        <height>195</height>
+       </rect>
       </property>
      </widget>
     </widget>
@@ -1160,11 +1125,6 @@
    <class>QQuickWidget</class>
    <extends>QWidget</extends>
    <header location="global">QtQuickWidgets/QQuickWidget</header>
-  </customwidget>
-  <customwidget>
-   <class>ChartView</class>
-   <extends>QGraphicsView</extends>
-   <header>chartview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

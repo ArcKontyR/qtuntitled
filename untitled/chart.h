@@ -6,41 +6,73 @@
 #include <QtSql>
 #include <QObject>
 
-//class QLineSeries;
-//class QValueAxis;
-//class QDateTimeAxis;
+// class QLineSeries;
+// class QValueAxis;
+// class QDateTimeAxis;
 
 class Chart : public QChart {
     Q_OBJECT
 public:
-    Chart(QGraphicsItem *parent = nullptr,
-          Qt::WindowFlags wFlags = {});
-    virtual ~Chart() override;
-    void setSqlQueryString(QString query);
+    Chart(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
+    // void setSqlQueryString(QString query);
 
 public slots:
-    void handleTimeout();
+    void setDatabase(QSqlDatabase);
+    void setSeries();
+    void setPen(QPen);
+    void drawPoint(qreal, qreal);
+    void chartIsIndex(bool isIndex = false);
+    void compute();
+    void setTableName(QString);
+    void clearChart();
+    void setFixXChecked(bool);
+    void setFixYChecked(bool);
+    void setDBRow(QString);
+    void setDBColumn(QString);
+    void setNumberOfRows(int);
 
 private:
-    QSqlQuery *query = new QSqlQuery;
-    QString sqlQueryString;
-    QTimer m_timer;
-    // QScatterSeries *m_series;
-    //QStringList m_titles;
-    QLineSeries *m_series;
-    QValueAxis *m_axisX;
-    QDateTimeAxis *m_daxisX;
-    QValueAxis *m_axisY;
-    qreal m_step;
+    QSqlDatabase db;
+    QString tableName;
+    QPen defaultPen = QPen(Qt::black, 1);
+    QPen pen = QPen(NULL_PEN);
+    QLineSeries *m_series = new QLineSeries;
+    QValueAxis *m_axisX = new QValueAxis;
+    QDateTimeAxis *m_daxisX = new QDateTimeAxis;
+    QValueAxis *m_axisY = new QValueAxis;
+
+    int numberOfRows;
+    QString row = "";
+    QString column = "";
+    QString strSelect = "";
     qreal m_x;
     qreal m_y;
-    qreal xmin = 0;
-    qreal xmax = 0;
-    qreal ymin = 0;
-    qreal ymax = 0;
+    qreal m_xPrev;
+    qreal m_yPrev;
+    qreal xmin;
+    qreal xmax;
+    qreal ymin;
+    qreal ymax;
     QDateTime m_dx;
-    long i = 0;
+    bool isIndex;
+    long i;
+    bool isIncrement;
+    bool shouldAppend;
+    qreal m_yLim;
+    qreal m_xMin;
+    bool isYMinZero;
+    // bool wasChecked;
+    bool fixXIsChecked;
+    bool fixYIsChecked;
+signals:
+    void getNumberOfRows(QSqlQuery *);
+    void setDrawingProgress(int);
+    void setPointsValue(int);
+    void setDrawingProgressDisabled();
 
+private slots:
+    QDateTime calculateTime(qreal);
 };
 
 #endif // CHART_H
+
