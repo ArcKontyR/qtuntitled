@@ -80,8 +80,8 @@ private:
     //QQuickWidget* m_quickWidget;
     QString fileName;
     QString fileNameShort;
-    QList<Chart*> charts;
-    QList<ChartView*> chartViews;
+    QList<QString> chartTitles;
+    QList<QString> chartViewTitles;
     const QString strTableQuery = "SELECT name FROM sqlite_master WHERE type = 'table'";
     const QString strMainTableCreate = "CREATE TABLE MainTable ("
                                        "name        TEXT,"
@@ -151,19 +151,17 @@ public slots:
     void saveDB(int _numberOfRows, QString _fileName, QString _description);
     void onDBProgressChanged(int progress);
     void onDBProgressBarVisibilityChanged();
-
-
-    void on_sbChartCount_valueChanged(int arg1);
-
     void on_cbChartRow_currentIndexChanged(int index);
 
-
 signals:
+    void setMapPlugin(QString plugin);
     void setMapCoordinate(double latitude, double longitude);
     void setMapCenter(double latitude, double longitude);
     void setMapZoomLevel(double zoom);
     void clearMapCoordinates();
     void setMapType(int typeValue);
+    void setMapOfflineDirectory(QString directory);
+    void setMapHighDPI(bool value);
 
     void open();
 
@@ -178,8 +176,11 @@ signals:
     void setChartDBRow(QString);
     void setChartDBColumn(QString);
     void setChartNumberOfRows(int);
+    void setChartAODensity(int);
     void drawChart();
     void clearChart();
+    void setChartUseOptimization(bool);
+    void setChartUseAltOptimization(bool);
     void setChartDrawingProgress(int);
     void setChartDrawingProgressDisabled();
     void setChartPointsValue(int);
@@ -187,6 +188,14 @@ signals:
     void update();
     void setDBProgress(int);
     void setDBProgressDisabled();
+private slots:
+    void on_pbMapHighDPI_clicked();
+    void on_pbMapLowDPI_clicked();
+    void on_sbChartAODensity_valueChanged(double arg1);
+    void on_chbChartUseAltOptimization_stateChanged(int arg1);
+    void on_chbChartUseOptimization_stateChanged(int arg1);
+    void on_pbMapOSM_clicked();
+    void on_pbMapESRI_clicked();
 };
 
 #endif // MAINWINDOW_H

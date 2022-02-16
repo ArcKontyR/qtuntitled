@@ -30,7 +30,9 @@ public slots:
     void setDBRow(QString);
     void setDBColumn(QString);
     void setNumberOfRows(int);
-
+    void setUseOptimization(bool);
+    void setUseAltOptimization(bool);
+    void setAODensity(int);
 private:
     QSqlDatabase db;
     QString tableName;
@@ -64,6 +66,9 @@ private:
     // bool wasChecked;
     bool fixXIsChecked;
     bool fixYIsChecked;
+    bool useOptimization;
+    bool useAltOptimization;
+    int aoDensity;
 signals:
     void getNumberOfRows(QSqlQuery *);
     void setDrawingProgress(int);
@@ -72,6 +77,7 @@ signals:
 
 private slots:
     QDateTime calculateTime(qreal);
+    void isCoordLimit(qreal _y, qreal _yLim);
 };
 
 #endif // CHART_H

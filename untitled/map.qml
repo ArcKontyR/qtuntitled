@@ -24,6 +24,65 @@ Item {
         onSetMapType: {
             _map.activeMapType = _map.supportedMapTypes[typeValue]
         }
+        onSetMapOfflineDirectory: {
+            osmOfflineDir.value = directory + "osm"
+            osmOfflineCacheDir.value = directory + "osm"
+            esriCacheDir.value = directory + "esri"
+        }
+        onSetMapHighDPI: {
+            osmHighDPI.value = value
+            //console.log(osmHighDPI.value, value)
+        }
+        onSetMapPlugin: {
+            if (plugin == "esri") {
+                _map.plugin = esriMapPlugin
+            } else {
+                _map.plugin = osmMapPlugin
+            }
+            console.log(plugin, _map.plugin)
+        }
+    }
+
+    Plugin {
+        id: osmMapPlugin
+        name: "osm"
+
+        PluginParameter {
+            id: osmHighDPI
+            name: "osm.mapping.highdpi_tiles"
+        }
+        PluginParameter {
+            id: osmOfflineCacheDir
+            name: "osm.mapping.cache.directory"
+        }
+        PluginParameter {
+            id: osmOfflineDir
+            name: "osm.mapping.offline.directory"
+        }
+        PluginParameter {
+            name: "osm.mapping.providersrepository.disabled"
+            value: "true"
+        }
+        PluginParameter {
+            name: "osm.mapping.providersrepository.address"
+            value: "http://maps-redirect.qt.io/osm/6.2/"
+        }
+    }
+
+    Plugin {
+        id: esriMapPlugin
+        name: "esri"
+        locales: "ru"
+
+        PluginParameter {
+            id: esriMaxZoomLevel
+            name: "esri.mapping.maximumZoomLevel"
+            value: 18
+        }
+        PluginParameter {
+            id: esriCacheDir
+            name: "esri.mapping.cache.directory"
+        }
     }
 
     Map {
@@ -31,22 +90,14 @@ Item {
         objectName: "map"
         width: parent.width
         height: parent.height
-        plugin: Plugin {
-            id: mapPlugin
-            name: "osm"
-
-            //            PluginParameter {
-            //                name: "osm.mapping.highdpi_tiles"
-            //                value: true
-            //            }
-            PluginParameter {
-                name: "osm.mapping.offline.directory"
-                value: "file://C:/Users/USER/Documents/Verhoturov/offline_tiles/"
-            }
-        }
         center: QtPositioning.coordinate(56.394, 61.9334)
         zoomLevel: 12
-
+        onSupportedMapTypesChanged: {
+            console.log("Supported MapType:")
+            for (var i = 0; i < _map.supportedMapTypes.length; i++) {
+                console.log(i, supportedMapTypes[i].name)
+            }
+        }
         MapPolyline {
             id: mapPolyline
             objectName: "mapPolyline"
@@ -64,7 +115,7 @@ Item {
     }
 
 
-    /*🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷
+    /*🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷
     🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷
     🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷
     🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷🕷
