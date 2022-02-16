@@ -17,10 +17,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setFixedSize(this->width(), this->height());
-
     connectSignals();
+    ui->lblChartOptimizationsWarning->setVisible(false);
+    ui->gbMapDPISelection->setVisible(false);
 
     /*--Настройка баз данных--*/
+
 
     db = QSqlDatabase::addDatabase("QSQLITE","mainConnection");
     db.setDatabaseName("database.sqlite");
@@ -125,12 +127,12 @@ MainWindow::MainWindow(QWidget *parent)
     /*--Настройка карты--*/
 
     ui->qwMap->setSource(QUrl("qrc:/map.qml"));
-    //ui->qwMap->resize(ui->qwMap->size());
     ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
     engine = ui->qwMap->engine();
     context = engine->rootContext();
     context->setContextProperty(QStringLiteral("main"), this);
     setMapInfo(56.394, 61.9334, 12);
+    emit setMapOfflineDirectory(QDir::currentPath() + "/offline_tiles/");
 
     /*--Настройка прогресс бара--*/
 
@@ -324,7 +326,6 @@ int MainWindow::countInsertQueryRows(QFile *file) {
     return rows;
 }
 
-
 void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                         QString _description) {
 
@@ -336,7 +337,6 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     _db.setDatabaseName("database.sqlite");
     _db.open();
     QSqlQuery *query = new QSqlQuery(_db);
-    // QSqlQuery* query2 = new QSqlQuery;
 
     QString strSelect = "SELECT * FROM '%1'";
     QString strAddTable = "INSERT INTO MainTable VALUES('%1','%2','%3');";
@@ -344,8 +344,6 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     strAddTable = strAddTable.arg(_fileNameShort)
                       .arg(_description)
                       .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"));
-    qDebug() << strAddTable;
-
 
     //    QString strCreate = "CREATE TABLE '%1' ("
     //                   "nNavCounter UINT32_T,"
@@ -704,9 +702,7 @@ void MainWindow::on_pbSetChart_clicked() {
     if (fileNameShort.isEmpty()) {
         return;
     }
-    ChartView *chartView = new ChartView();
     Chart *chart = new Chart();
-    connect(this, SIGNAL(clearChart()), chart, SLOT(clearChart()));
     connect(this, SIGNAL(drawChart()), chart, SLOT(compute()));
     connect(this, SIGNAL(setChartTableName(QString)), chart,
             SLOT(setTableName(QString)));
@@ -718,6 +714,12 @@ void MainWindow::on_pbSetChart_clicked() {
             SLOT(setFixYChecked(bool)));
     connect(this, SIGNAL(setChartFixYChecked(bool)), chart,
             SLOT(setFixYChecked(bool)));
+    connect(this, SIGNAL(setChartUseOptimization(bool)), chart,
+            SLOT(setUseOptimization(bool)));
+    connect(this, SIGNAL(setChartUseAltOptimization(bool)), chart,
+            SLOT(setUseAltOptimization(bool)));
+    connect(this, SIGNAL(setChartAODensity(int)), chart,
+            SLOT(setAODensity(int)));
     connect(this, SIGNAL(setChartDBRow(QString)), chart,
             SLOT(setDBRow(QString)));
     connect(this, SIGNAL(setChartDBColumn(QString)), chart,
@@ -733,6 +735,7 @@ void MainWindow::on_pbSetChart_clicked() {
     connect(chart, SIGNAL(setPointsValue(int)), this,
             SLOT(onChartPointsValueChanged(int)));
 
+
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "chartConnection");
     _db.setDatabaseName("database.sqlite");
     _db.open();
@@ -743,19 +746,20 @@ void MainWindow::on_pbSetChart_clicked() {
     emit setChartDBRow(structListVarX.at(ui->cbChartRow->currentIndex()));
     emit setChartDBColumn(
         structListVariables.at(ui->cbChartColumn->currentIndex()));
+    emit setChartUseOptimization(ui->chbChartUseOptimization->isChecked());
+    emit setChartUseAltOptimization(ui->chbChartUseAltOptimization->isChecked());
+    emit setChartAODensity(qCeil(ui->sbChartAODensity->value()));
     emit clearChart();
     emit drawChart();
-    chartView->setChart(chart);
-    ui->glCharts->addWidget(chartView,0,0);
 
-    //chartViews.append(chartView);
-    //charts.append(chart);
+    ui->chartView->setChart(chart);
 
     disconnect(this, nullptr, chart, nullptr);
     disconnect(chart, nullptr, this, nullptr);
-    //for (int a=0; a<chartViews.size(); a++){
-    //    qDebug() << chartViews[a]->chart()->title() << charts[a]->title();
-    //}
+
+    connect(this, SIGNAL(clearChart()), chart, SLOT(clearChart()));
+    connect(chart, SIGNAL(setPointsValue(int)), this,
+            SLOT(onChartPointsValueChanged(int)));
 }
 
 void MainWindow::onChartDrawingProgressChanged(int progress) {
@@ -1008,11 +1012,6 @@ void MainWindow::on_pbDbTableChangeDescription_clicked() {
     emit update();
 }
 
-void MainWindow::on_sbChartCount_valueChanged(int arg1) {
-
-}
-
-
 void MainWindow::on_cbChartRow_currentIndexChanged(int index) {
     if (ui->chbChartFixAxisX->isEnabled()) {
         fixAxisXWasChecked = ui->chbChartFixAxisX->isChecked();
@@ -1029,4 +1028,82 @@ void MainWindow::on_cbChartRow_currentIndexChanged(int index) {
     }
 }
 
+void MainWindow::on_pbMapHighDPI_clicked() {
+    emit setMapHighDPI(true);
+    ui->gbMapDPISelection->setVisible(false);
+    ui->pbAddMap->setEnabled(true);
+    ui->pbClearMap->setEnabled(true);
+    ui->cbMapType->setEnabled(true);
+}
+
+void MainWindow::on_pbMapLowDPI_clicked() {
+    emit setMapHighDPI(false);
+    ui->gbMapDPISelection->setVisible(false);
+    ui->pbAddMap->setEnabled(true);
+    ui->pbClearMap->setEnabled(true);
+    ui->cbMapType->setEnabled(true);
+}
+
+
+void MainWindow::on_sbChartAODensity_valueChanged(double arg1) {
+    emit setChartAODensity(qCeil(arg1));
+}
+
+
+void MainWindow::on_chbChartUseAltOptimization_stateChanged(int arg1) {
+    ui->sbChartAODensity->setEnabled(arg1);
+    if (ui->chbChartUseAltOptimization->isChecked() &&
+        ui->chbChartUseOptimization->isChecked()) {
+        ui->lblChartOptimizationsWarning->setVisible(true);
+    } else {
+        ui->lblChartOptimizationsWarning->setVisible(false);
+    }
+}
+
+
+void MainWindow::on_chbChartUseOptimization_stateChanged(int arg1)
+{
+    if (ui->chbChartUseAltOptimization->isChecked() &&
+        ui->chbChartUseOptimization->isChecked()) {
+        ui->lblChartOptimizationsWarning->setVisible(true);
+    } else {
+        ui->lblChartOptimizationsWarning->setVisible(false);
+    }
+}
+
+
+void MainWindow::on_pbMapOSM_clicked() {
+    QStringList list;
+    list << "Стандартный"
+         << "Велосипед"
+         << "Обществ. транспорт"
+         << "Ночной транспорт"
+         << "Местность"
+         << "Туризм";
+    emit setMapPlugin("osm");
+    ui->gbMapDPISelection->setVisible(true);
+    ui->cbMapType->addItems(list);
+    ui->gbMapSelection->setVisible(false);
+}
+
+
+void MainWindow::on_pbMapESRI_clicked() {
+    QStringList list;
+    list << "Стандартный"
+         << "Спутник"
+         << "Местность"
+         << "Топография"
+         << "Топография США"
+         << "Национальная"
+         << "Светло-серый холст"
+         << "Физическая"
+         << "Затененный рельеф"
+         << "Мировой океан"
+         << "Темно-серый холст"
+         << "Карта Делорм";
+    emit setMapPlugin("esri");
+    ui->cbMapType->addItems(list);
+    ui->gbMapSelection->setVisible(false);
+    ui->gbMapDPISelection->setVisible(false);
+}
 

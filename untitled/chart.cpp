@@ -41,6 +41,7 @@ void Chart::clearChart() {
     shouldAppend = true;
     m_yLim = 0;
     isYMinZero = true;
+    emit setPointsValue(0);
 }
 
 void Chart::setSeries() {
@@ -63,13 +64,35 @@ void Chart::setTableName(QString _tableName) {
         tableName = _tableName;
 }
 void Chart::setDatabase(QSqlDatabase _db) { db = _db; }
+void Chart::setUseOptimization(bool _useOpt) { useOptimization = _useOpt; }
+void Chart::setUseAltOptimization(bool _useAltOpt) { useAltOptimization = _useAltOpt; }
+void Chart::setAODensity(int _aoDensity) { aoDensity = _aoDensity; }
+void Chart::isCoordLimit(qreal _y, qreal _yLim) {
+    if (isIncrement) {
+        if (_y > _yLim) {
+            m_yLim = _y;
+        } else {
+            isIncrement = false;
+            shouldAppend = true;
+        }
+    } else {
+        if (_y < _yLim) {
+            m_yLim = _y;
+        } else {
+            isIncrement = true;
+            shouldAppend = true;
+        }
+    }
+}
 
 void Chart::compute() {
+    qDebug() << useOptimization << useAltOptimization << aoDensity;
+    clearChart();
     setSeries();
     QSqlQuery *query = new QSqlQuery(db);
 
-    // qDebug() << row << column;
     int points = 0;
+    int truePoints = 0;
 
     if (row == "i") {
         strSelect = "SELECT %1 FROM '%2'";
@@ -78,32 +101,33 @@ void Chart::compute() {
         strSelect = "SELECT %1, %2 FROM '%3'";
         strSelect = strSelect.arg(row).arg(column).arg(tableName);
     }
-    // qDebug() << strSelect;
     query->exec(strSelect);
     emit getNumberOfRows(query);
-    // int numberOfRows = countSelectQueryRows(query);
     while (query->next()) {
         if (query->value(1).toString() == "") {
             chartIsIndex(true);
             m_x = i;
             m_y = query->value(0).toDouble();
-            //++i;
-            if (isIncrement) {
-                if (m_y > m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = false;
-                    shouldAppend = true;
-                }
+            ++i;
+            if (useOptimization) {
+                isCoordLimit(m_y, m_yLim);
+                if (shouldAppend)
+                    ++truePoints;
             } else {
-                if (m_y < m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = true;
+                m_yLim = m_y;
+                shouldAppend = true;
+                ++truePoints;
+            }
+
+            if (useAltOptimization) {
+
+                if ((truePoints % aoDensity) == 0 && shouldAppend) {
                     shouldAppend = true;
+                } else {
+                    shouldAppend = false;
                 }
             }
-            ++i;
+
         } else {
             m_x = query->value(0).toDouble();
 
@@ -117,23 +141,12 @@ void Chart::compute() {
                     QTime(num.left(2).toInt(), num.left(4).right(2).toInt(),
                           num.right(5).left(2).toInt(), num.right(3).toInt()));
             }
-
             m_y = query->value(1).toDouble();
-
-            if (isIncrement) {
-                if (m_y > m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = false;
-                    shouldAppend = true;
-                }
+            if (useOptimization) {
+                isCoordLimit(m_y, m_yLim);
             } else {
-                if (m_y < m_yLim) {
-                    m_yLim = m_y;
-                } else {
-                    isIncrement = true;
-                    shouldAppend = true;
-                }
+                m_yLim = m_y;
+                shouldAppend = true;
             }
             ++i;
         }
@@ -153,6 +166,7 @@ void Chart::compute() {
             ymin = m_y;
         }
 
+
         if (shouldAppend) {
             if (isIndex) {
                 drawPoint(m_x, m_yLim);
@@ -162,7 +176,6 @@ void Chart::compute() {
             points++;
             shouldAppend = false;
             int progress = qCeil(100 * i / numberOfRows);
-            // qDebug() << progress << i << numberOfRows ;
             emit setDrawingProgress(progress);
         }
     }
