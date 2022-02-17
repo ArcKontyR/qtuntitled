@@ -162,6 +162,8 @@ signals:
     void setMapType(int typeValue);
     void setMapOfflineDirectory(QString directory);
     void setMapHighDPI(bool value);
+    void setMapLineColor(QColor color);
+    void setMapLineWidth(int width);
 
     void open();
 
@@ -189,13 +191,17 @@ signals:
     void setDBProgress(int);
     void setDBProgressDisabled();
 private slots:
-    void on_pbMapHighDPI_clicked();
-    void on_pbMapLowDPI_clicked();
+
     void on_sbChartAODensity_valueChanged(double arg1);
     void on_chbChartUseAltOptimization_stateChanged(int arg1);
     void on_chbChartUseOptimization_stateChanged(int arg1);
-    void on_pbMapOSM_clicked();
-    void on_pbMapESRI_clicked();
+
+    void on_pbMapDrawingColorSelection_clicked();
+    void on_sbMapDrawingWidthValue_valueChanged(double arg1);
+    void on_pbMapSelectionAccept_clicked();
+    void installOSMPlugin();
+    void installESRIPlugin();
+    void on_pbMapDPISelectionAccept_clicked();
 };
 
 #endif // MAINWINDOW_H
