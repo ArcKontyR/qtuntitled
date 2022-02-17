@@ -16,13 +16,11 @@ MainWindow::MainWindow(QWidget *parent)
       , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setFixedSize(this->width(), this->height());
+    // this->setFixedSize(this->width(), this->height());
     connectSignals();
     ui->lblChartOptimizationsWarning->setVisible(false);
-    ui->gbMapDPISelection->setVisible(false);
 
     /*--Настройка баз данных--*/
-
 
     db = QSqlDatabase::addDatabase("QSQLITE","mainConnection");
     db.setDatabaseName("database.sqlite");
@@ -197,21 +195,14 @@ int MainWindow::countSelectQueryRows(QSqlQuery *query) {
 
 void MainWindow::setMapPath() {
     clearMapFromPath();
-
-    qDebug() << QSqlDatabase::connectionNames();
-
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "newConnection");
     _db.setDatabaseName("database.sqlite");
     _db.open();
     QSqlQuery *query = new QSqlQuery(_db);
     strSelect = "SELECT B, L FROM '%1'";
     strSelect = strSelect.arg(fileNameShort);
-
-    qDebug() << QSqlDatabase::connectionNames();
-
     query->exec(strSelect);
     int numberOfRows = countSelectQueryRows(query);
-
     double lat = 0;
     double lon = 0;
     int coords = 0;
@@ -235,9 +226,6 @@ void MainWindow::setMapPath() {
     _db.~QSqlDatabase();
     _db.removeDatabase(_db.connectionName());
     emit setMapDrawingProgressDisabled();
-
-    qDebug() << QSqlDatabase::connectionNames();
-
     emit setMapCenter(lat, lon);
     emit setMapCoordCountValue(trueCoords);
     ui->pbAddMap->setText("Перерисовать маршрут");
@@ -345,114 +333,60 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                       .arg(_description)
                       .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"));
 
-    //    QString strCreate = "CREATE TABLE '%1' ("
-    //                   "nNavCounter UINT32_T,"
-    //                   "sns_utc     UINT32_T,"
-    //                   "snd_utc     UINT32_T,"
-    //                   "V_X         DOUBLE,"
-    //                   "V_Y         DOUBLE,"
-    //                   "V_Z         DOUBLE,"
-    //                   "Vair        DOUBLE,"
-    //                   "roll        DOUBLE,"
-    //                   "pitch       DOUBLE,"
-    //                   "head        DOUBLE,"
-    //                   "head_magn   DOUBLE,"
-    //                   "B           DOUBLE,"
-    //                   "L           DOUBLE,"
-    //                   "h           DOUBLE,"
-    //                   "Wx          DOUBLE,"
-    //                   "Wy          DOUBLE,"
-    //                   "Wz          DOUBLE,"
-    //                   "alfa        DOUBLE,"
-    //                   "beta        DOUBLE,"
-    //                   "H_baro      DOUBLE,"
-    //                   "Pst         DOUBLE,"
-    //                   "Tnv         DOUBLE,"
-    //                   "Nx          DOUBLE,"
-    //                   "Ny          DOUBLE,"
-    //                   "Nz          DOUBLE,"
-    //                   "coarse      DOUBLE,"
-    //                   "WindDir     DOUBLE,"
-    //                   "WindV       DOUBLE,"
-    //                   "op_ns       UINT8_T,"
-    //                   "op_ver      UINT8_T,"
-    //                   "np_ns       UINT8_T,"
-    //                   "np_ver      UINT8_T,"
-    //                   "np_num      UINT8_T,"
-    //                   "align_time  UINT8_T,"
-    //                   "nav_mode    UINT8_T,"
-    //                   "nUDPCounter UINT32_T,"
-    //                   "unix_time   UINT64_T,"
-    //                   "work_time   UINT16_T,"
-    //                   "priority    UINT8_T,"
-    //                   "gps_glo     UINT8_T,"
-    //                   "sns_mode    UINT8_T,"
-    //                   "sns_cmd     UINT8_T,"
-    //                   "pni_bits    UINT32_T,"
-    //                   "fix_bits    UINT32_T,"
-    //                   "recv_status UINT32_T"
-    //                   ");";
-    QString strCreate = "CREATE TABLE '%1' ("
-                        "nNavCounter TEXT,"
-                        "sns_utc     TEXT,"
-                        "snd_utc     TEXT,"
-                        "V_X         TEXT,"
-                        "V_Y         TEXT,"
-                        "V_Z         TEXT,"
-                        "Vair        TEXT,"
-                        "roll        TEXT,"
-                        "pitch       TEXT,"
-                        "head        TEXT,"
-                        "head_magn   TEXT,"
-                        "B           TEXT,"
-                        "L           TEXT,"
-                        "h           TEXT,"
-                        "Wx          TEXT,"
-                        "Wy          TEXT,"
-                        "Wz          TEXT,"
-                        "alfa        TEXT,"
-                        "beta        TEXT,"
-                        "H_baro      TEXT,"
-                        "Pst         TEXT,"
-                        "Tnv         TEXT,"
-                        "Nx          TEXT,"
-                        "Ny          TEXT,"
-                        "Nz          TEXT,"
-                        "coarse      TEXT,"
-                        "WindDir     TEXT,"
-                        "WindV       TEXT,"
-                        "op_ns       TEXT,"
-                        "op_ver      TEXT,"
-                        "np_ns       TEXT,"
-                        "np_ver      TEXT,"
-                        "np_num      TEXT,"
-                        "align_time  TEXT,"
-                        "nav_mode    TEXT,"
-                        "nUDPCounter TEXT,"
-                        "unix_time   TEXT,"
-                        "work_time   TEXT,"
-                        "priority    TEXT,"
-                        "gps_glo     TEXT,"
-                        "sns_mode    TEXT,"
-                        "sns_cmd     TEXT,"
-                        "pni_bits    TEXT,"
-                        "fix_bits    TEXT,"
-                        "recv_status TEXT"
-                        ");";
+        QString strCreate = "CREATE TABLE '%1' ("
+                       "nNavCounter UINT32_T,"
+                       "sns_utc     UINT32_T,"
+                       "snd_utc     UINT32_T,"
+                       "V_X         DOUBLE,"
+                       "V_Y         DOUBLE,"
+                       "V_Z         DOUBLE,"
+                       "Vair        DOUBLE,"
+                       "roll        DOUBLE,"
+                       "pitch       DOUBLE,"
+                       "head        DOUBLE,"
+                       "head_magn   DOUBLE,"
+                       "B           DOUBLE,"
+                       "L           DOUBLE,"
+                       "h           DOUBLE,"
+                       "Wx          DOUBLE,"
+                       "Wy          DOUBLE,"
+                       "Wz          DOUBLE,"
+                       "alfa        DOUBLE,"
+                       "beta        DOUBLE,"
+                       "H_baro      DOUBLE,"
+                       "Pst         DOUBLE,"
+                       "Tnv         DOUBLE,"
+                       "Nx          DOUBLE,"
+                       "Ny          DOUBLE,"
+                       "Nz          DOUBLE,"
+                       "coarse      DOUBLE,"
+                       "WindDir     DOUBLE,"
+                       "WindV       DOUBLE,"
+                       "op_ns       UINT8_T,"
+                       "op_ver      UINT8_T,"
+                       "np_ns       UINT8_T,"
+                       "np_ver      UINT8_T,"
+                       "np_num      UINT8_T,"
+                       "align_time  UINT8_T,"
+                       "nav_mode    UINT8_T,"
+                       "nUDPCounter UINT32_T,"
+                       "unix_time   UINT64_T,"
+                       "work_time   UINT16_T,"
+                       "priority    UINT8_T,"
+                       "gps_glo     UINT8_T,"
+                       "sns_mode    UINT8_T,"
+                       "sns_cmd     UINT8_T,"
+                       "pni_bits    UINT32_T,"
+                       "fix_bits    UINT32_T,"
+                       "recv_status UINT32_T"
+                       ");";
 
     strCreate = strCreate.arg(_fileNameShort);
-    // strCreate2 = strCreate2.arg(fileNameShort+"_");
     ui->prbrDBSave->setValue(5);
-    if (!query->exec(strCreate) /*&& !query2->exec(strCreate2)*/) {
-        // qDebug() << !query->exec(strCreate) << "a";
+    if (!query->exec(strCreate)) {
     } else {
-        // qDebug() << "insert";
-        // qDebug() << strCreate2;
         query->exec(strAddTable);
-        //query->numRowsAffected();
-
         if (file->open(QIODevice::ReadOnly)) {
-
             QDataStream stream(file);
             stream.setByteOrder(QDataStream::LittleEndian);
             stream.setVersion(QDataStream::Qt_5_15);
@@ -482,122 +416,57 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                 emit setDBProgress(progress);
 
                 if (tmpData.pni_bits != 0) {
-                    //                    QString strInsert =
-                    //                        "INSERT INTO '%1' (nNavCounter,
-                    //                        sns_utc, snd_utc, " "V_X, V_Y,
-                    //                        V_Z, Vair, roll, pitch, head,
-                    //                        head_magn, B, " "L, h, " "Wx, Wy,
-                    //                        Wz, alfa, beta, H_baro, Pst, Tnv,
-                    //                        Nx, Ny, Nz, " "coarse, " "WindDir,
-                    //                        WindV, op_ns, op_ver, np_ns,
-                    //                        np_ver, " "np_num, align_time,
-                    //                        nav_mode, nUDPCounter,unix_time, "
-                    //                        "work_time, priority, gps_glo,
-                    //                        sns_mode, sns_cmd, " "pni_bits,
-                    //                        fix_bits, recv_status) " "VALUES "
-                    //                        "(%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,%21,"
-                    //                        "%22,%23,%24,%25,%26,%27,%28,%29,%30,%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,%41,%42,%43,%44,%45,%46);";
                     QString strInsert =
                         "INSERT INTO '%1' (nNavCounter, sns_utc, snd_utc, "
-                        "V_X, V_Y, V_Z, Vair, roll, pitch, head, head_magn, B, "
+                        "V_X, V_Y, V_Z, Vair, roll, pitch, head,head_magn, B, "
                         "L, h, "
-                        "Wx, Wy, Wz, alfa, beta, H_baro, Pst, Tnv, Nx, Ny, Nz, "
+                        "Wx, Wy,Wz, alfa, beta, H_baro, Pst, Tnv,Nx, Ny, Nz, "
                         "coarse, "
                         "WindDir, WindV, op_ns, op_ver, np_ns, np_ver, "
-                        "np_num, align_time, nav_mode, nUDPCounter,unix_time, "
+                        "np_num, align_time,nav_mode, nUDPCounter,unix_time, "
                         "work_time, priority, gps_glo, sns_mode, sns_cmd, "
-                        "pni_bits, fix_bits, recv_status) "
+                        "pni_bits,fix_bits, recv_status) "
                         "VALUES "
-                        "('%2','%3','%4','%5','%6','%7','%8','%9','%10','%11','"
-                        "%12','%13','%14','%15','%16','%17','%18','%19','%20','"
-                        "%21',"
-                        "'%22','%23','%24','%25','%26','%27','%28','%29','%30',"
-                        "'%31','%32','%33','%34','%35','%36','%37','%38','%39',"
-                        "'%40',"
-                        "'%41','%42','%43','%44','%45','%46');";
-
-                    //                    strInsert =
-                    //                    strInsert.arg(fileNameShort)
-                    //                                    .arg(tmpData.nNavCounter)
-                    //                                    .arg(tmpData.sns_utc)
-                    //                                    .arg(tmpData.snd_utc)
-                    //                                    .arg(tmpData.V_X)
-                    //                                    .arg(tmpData.V_Y)
-                    //                                    .arg(tmpData.V_Z)
-                    //                                    .arg(tmpData.Vair)
-                    //                                    .arg(tmpData.roll)
-                    //                                    .arg(tmpData.pitch)
-                    //                                    .arg(tmpData.head)
-                    //                                    .arg(tmpData.head_magn)
-                    //                                    .arg(tmpData.B)
-                    //                                    .arg(tmpData.L)
-                    //                                    .arg(tmpData.h)
-                    //                                    .arg(tmpData.Wx)
-                    //                                    .arg(tmpData.Wy)
-                    //                                    .arg(tmpData.Wz)
-                    //                                    .arg(tmpData.alfa)
-                    //                                    .arg(tmpData.beta)
-                    //                                    .arg(tmpData.H_baro)
-                    //                                    .arg(tmpData.Pst)
-                    //                                    .arg(tmpData.Tnv)
-                    //                                    .arg(tmpData.Nx)
-                    //                                    .arg(tmpData.Ny)
-                    //                                    .arg(tmpData.Nz)
-                    //                                    .arg(tmpData.coarse)
-                    //                                    .arg(tmpData.WindDir)
-                    //                                    .arg(tmpData.WindV)
-                    //                                    .arg(tmpData.op_ns)
-                    //                                    .arg(tmpData.op_ver)
-                    //                                    .arg(tmpData.np_ns)
-                    //                                    .arg(tmpData.np_ver)
-                    //                                    .arg(tmpData.np_num)
-                    //                                    .arg(tmpData.align_time)
-                    //                                    .arg(tmpData.nav_mode)
-                    //                                    .arg(tmpData.nUDPCounter)
-                    //                                    .arg(tmpData.unix_time)
-                    //                                    .arg(tmpData.work_time)
-                    //                                    .arg(tmpData.priority)
-                    //                                    .arg(tmpData.gps_glo)
-                    //                                    .arg(tmpData.sns_mode)
-                    //                                    .arg(tmpData.sns_cmd)
-                    //                                    .arg(tmpData.pni_bits)
-                    //                                    .arg(tmpData.fix_bits)
-                    //                                    .arg(tmpData.recv_status);
-                    int precision = 16;
+                        "(%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%"
+                        "17,%18,%19,%20,%21,"
+                        "%22,%23,%24,%25,%26,%27,%28,%29,%30,%31,%32,%33,%34,%"
+                        "35,%36,%37,%38,%39,%40,%41,%42,%43,%44,%45,%46);";
+                    int precision = 14;
+                    char format = 'f';
                     strInsert =
                         strInsert.arg(_fileNameShort)
                             .arg(QString::number(tmpData.nNavCounter))
                             .arg(QString::number(tmpData.sns_utc))
                             .arg(QString::number(tmpData.snd_utc))
-                            .arg(QString::number(tmpData.V_X, 'g', precision))
-                            .arg(QString::number(tmpData.V_Y, 'g', precision))
-                            .arg(QString::number(tmpData.V_Z, 'g', precision))
-                            .arg(QString::number(tmpData.Vair, 'g', precision))
-                            .arg(QString::number(tmpData.roll, 'g', precision))
-                            .arg(QString::number(tmpData.pitch, 'g', precision))
-                            .arg(QString::number(tmpData.head, 'g', precision))
-                            .arg(QString::number(tmpData.head_magn, 'g',
+                            .arg(QString::number(tmpData.V_X, format, precision))
+                            .arg(QString::number(tmpData.V_Y, format, precision))
+                            .arg(QString::number(tmpData.V_Z, format, precision))
+                            .arg(QString::number(tmpData.Vair, format, precision))
+                            .arg(QString::number(tmpData.roll, format, precision))
+                            .arg(QString::number(tmpData.pitch, format, precision))
+                            .arg(QString::number(tmpData.head, format, precision))
+                            .arg(QString::number(tmpData.head_magn, format,
                                                  precision))
-                            .arg(QString::number(tmpData.B, 'g', precision))
-                            .arg(QString::number(tmpData.L, 'g', precision))
-                            .arg(QString::number(tmpData.h, 'g', precision))
-                            .arg(QString::number(tmpData.Wx, 'g', precision))
-                            .arg(QString::number(tmpData.Wy, 'g', precision))
-                            .arg(QString::number(tmpData.Wz, 'g', precision))
-                            .arg(QString::number(tmpData.alfa, 'g', precision))
-                            .arg(QString::number(tmpData.beta, 'g', precision))
+                            .arg(QString::number(tmpData.B, format, precision))
+                            .arg(QString::number(tmpData.L, format, precision))
+                            .arg(QString::number(tmpData.h, format, precision))
+                            .arg(QString::number(tmpData.Wx, format, precision))
+                            .arg(QString::number(tmpData.Wy, format, precision))
+                            .arg(QString::number(tmpData.Wz, format, precision))
+                            .arg(QString::number(tmpData.alfa, format, precision))
+                            .arg(QString::number(tmpData.beta, format, precision))
                             .arg(
-                                QString::number(tmpData.H_baro, 'g', precision))
-                            .arg(QString::number(tmpData.Pst, 'g', precision))
-                            .arg(QString::number(tmpData.Tnv, 'g', precision))
-                            .arg(QString::number(tmpData.Nx, 'g', precision))
-                            .arg(QString::number(tmpData.Ny, 'g', precision))
-                            .arg(QString::number(tmpData.Nz, 'g', precision))
+                                QString::number(tmpData.H_baro, format, precision))
+                            .arg(QString::number(tmpData.Pst, format, precision))
+                            .arg(QString::number(tmpData.Tnv, format, precision))
+                            .arg(QString::number(tmpData.Nx, format, precision))
+                            .arg(QString::number(tmpData.Ny, format, precision))
+                            .arg(QString::number(tmpData.Nz, format, precision))
                             .arg(
-                                QString::number(tmpData.coarse, 'g', precision))
-                            .arg(QString::number(tmpData.WindDir, 'g',
+                                QString::number(tmpData.coarse, format, precision))
+                            .arg(QString::number(tmpData.WindDir, format,
                                                  precision))
-                            .arg(QString::number(tmpData.WindV, 'g', precision))
+                            .arg(QString::number(tmpData.WindV, format, precision))
                             .arg(QString::number(tmpData.op_ns))
                             .arg(QString::number(tmpData.op_ver))
                             .arg(QString::number(tmpData.np_ns))
@@ -619,12 +488,6 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                         qDebug() << "Unable to make insert operation"
                                  << query->lastError() << strInsert;
                     }
-                    //                    if (!query2->exec(strInsert2)) {
-                    //                        qDebug() << "Unable to make insert
-                    //                        operation"
-                    //                                 << query2->lastError() <<
-                    //                                 strInsert2;
-                    //                    }
                 }
                 tmpData.~BpiData();
             }
@@ -666,10 +529,8 @@ void MainWindow::on_pbDBSave_clicked() {
             .result();
     file->close();
     file->~QFile();
-    qDebug() << numberOfRows;
 
     QtConcurrent::run(this, &MainWindow::saveDB,numberOfRows,fileName,description);
-
 
 }
 
@@ -686,13 +547,7 @@ void MainWindow::openTable() {
     QSqlQueryModel *sqlModel = new QSqlQueryModel;
 
     if (query->exec(strSelect)) {
-
         sqlModel->setQuery(*query);
-
-        if (sqlModel->lastError().isValid()) {
-            qDebug() << sqlModel->lastError() << "model error";
-        } else
-        qDebug() << query->lastError() << "query error";
         ui->tvSqlTable->setModel(sqlModel);
     }
     query->~QSqlQuery();
@@ -921,7 +776,6 @@ void MainWindow::on_pbDBTableDelete_clicked() {
 }
 
 void MainWindow::updateTables() {
-    qDebug() << "signal received";
     if (ui->tvSqlTable_Tables->model() != nullptr) {
         ui->tvSqlTable_Tables->model()->~QAbstractItemModel();
     }
@@ -951,17 +805,28 @@ void MainWindow::updateTables() {
         ui->teDBTableDescription->setText(
             ui->tvSqlTable_Tables->model()->index(0, 1).data().toString());
         ui->pbDbTableChangeDescription->setEnabled(true);
+
+
+        ui->pbAddMap->setEnabled(true);
+        ui->pbClearMap->setEnabled(true);
+        ui->cbMapType->setEnabled(true);
+        ui->pbSetChart->setEnabled(true);
+        ui->pbDeleteChart->setEnabled(true);
     } else {
         fileNameShort = "";
         ui->lblSqlTableSelectedValue->setText("");
         ui->lblMapSelectedTableValue->setText("");
         ui->teDBTableDescription->setText("");
         ui->pbDbTableChangeDescription->setEnabled(false);
+
+        ui->pbAddMap->setEnabled(false);
+        ui->cbMapType->setEnabled(false);
+        ui->pbSetChart->setEnabled(false);
+        ui->pbDeleteChart->setEnabled(false);
     }
     ui->tvSqlTable_Tables->setModel(sqlModel);
     query->clear();
 
-    qDebug() << query << "3";
     query->~QSqlQuery();
 }
 
@@ -975,6 +840,12 @@ void MainWindow::on_tvSqlTable_Tables_doubleClicked(const QModelIndex &index) {
     ui->lblMapSelectedTableValue->setText(fileNameShort);
     ui->teDBTableDescription->setText(index.siblingAtColumn(1).data().toString());
     ui->pbDbTableChangeDescription->setEnabled(true);
+
+    ui->pbAddMap->setEnabled(true);
+    ui->pbClearMap->setEnabled(true);
+    ui->cbMapType->setEnabled(true);
+    ui->pbSetChart->setEnabled(true);
+    ui->pbDeleteChart->setEnabled(true);
     //openTable();
     emit open();
 }
@@ -985,7 +856,6 @@ void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
         ui->lblMapCoordDensityWarning->setText(
             "Для лучшего качества уменьшите значение параметра");
         ui->lblMapCoordDensityWarning->setStyleSheet("color: orange; font: 10pt \"Century Gothic\";");
-
     }else
         if(arg1 >= 501 && arg1 <=1000){
         ui->lblMapCoordDensityWarning->setText("Рекомендуется уменьшить значение параметра");
@@ -996,10 +866,8 @@ void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
         ui->lblMapCoordDensityWarning->setStyleSheet("color: darkred; font: 10pt \"Century Gothic\";");
     } else{
         ui->lblMapCoordDensityWarning->setText("");
-
     }
 }
-
 
 void MainWindow::on_pbDbTableChangeDescription_clicked() {
     QString strUpdate =
@@ -1028,27 +896,9 @@ void MainWindow::on_cbChartRow_currentIndexChanged(int index) {
     }
 }
 
-void MainWindow::on_pbMapHighDPI_clicked() {
-    emit setMapHighDPI(true);
-    ui->gbMapDPISelection->setVisible(false);
-    ui->pbAddMap->setEnabled(true);
-    ui->pbClearMap->setEnabled(true);
-    ui->cbMapType->setEnabled(true);
-}
-
-void MainWindow::on_pbMapLowDPI_clicked() {
-    emit setMapHighDPI(false);
-    ui->gbMapDPISelection->setVisible(false);
-    ui->pbAddMap->setEnabled(true);
-    ui->pbClearMap->setEnabled(true);
-    ui->cbMapType->setEnabled(true);
-}
-
-
 void MainWindow::on_sbChartAODensity_valueChanged(double arg1) {
     emit setChartAODensity(qCeil(arg1));
 }
-
 
 void MainWindow::on_chbChartUseAltOptimization_stateChanged(int arg1) {
     ui->sbChartAODensity->setEnabled(arg1);
@@ -1060,7 +910,6 @@ void MainWindow::on_chbChartUseAltOptimization_stateChanged(int arg1) {
     }
 }
 
-
 void MainWindow::on_chbChartUseOptimization_stateChanged(int arg1)
 {
     if (ui->chbChartUseAltOptimization->isChecked() &&
@@ -1071,8 +920,7 @@ void MainWindow::on_chbChartUseOptimization_stateChanged(int arg1)
     }
 }
 
-
-void MainWindow::on_pbMapOSM_clicked() {
+void MainWindow::installOSMPlugin() {
     QStringList list;
     list << "Стандартный"
          << "Велосипед"
@@ -1081,17 +929,18 @@ void MainWindow::on_pbMapOSM_clicked() {
          << "Местность"
          << "Туризм";
     emit setMapPlugin("osm");
-    ui->gbMapDPISelection->setVisible(true);
+    ui->cbMapDPISelection->setEnabled(true);
     ui->cbMapType->addItems(list);
-    ui->gbMapSelection->setVisible(false);
+    ui->cbMapSelection->setEnabled(false);
+    ui->pbMapDPISelectionAccept->setEnabled(true);
+    ui->pbMapSelectionAccept->setEnabled(false);
 }
 
-
-void MainWindow::on_pbMapESRI_clicked() {
+void MainWindow::installESRIPlugin() {
     QStringList list;
     list << "Стандартный"
          << "Спутник"
-         << "Местность"
+         << "Базовая местность"
          << "Топография"
          << "Топография США"
          << "Национальная"
@@ -1103,7 +952,55 @@ void MainWindow::on_pbMapESRI_clicked() {
          << "Карта Делорм";
     emit setMapPlugin("esri");
     ui->cbMapType->addItems(list);
-    ui->gbMapSelection->setVisible(false);
-    ui->gbMapDPISelection->setVisible(false);
+    ui->cbMapSelection->setEnabled(false);
+    ui->pbMapSelectionAccept->setEnabled(false);
+    ui->cbMapDPISelection->setEnabled(false);
+    ui->cbMapDPISelection->clear();
+    ui->cbMapDPISelection->addItem("ESRI");
+    if (fileNameShort != "") {
+        ui->pbAddMap->setEnabled(true);
+        ui->cbMapType->setEnabled(true);
+    }
+    ui->pbClearMap->setEnabled(true);
+}
+
+void MainWindow::on_pbMapDrawingColorSelection_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wMapDrawingColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wMapDrawingColorDisplay->setPalette(palette);
+    }
+    emit setMapLineColor(colorDialog.currentColor());
+}
+
+void MainWindow::on_sbMapDrawingWidthValue_valueChanged(double arg1) {
+    emit setMapLineWidth(qFloor(arg1));
+}
+
+void MainWindow::on_pbMapSelectionAccept_clicked() {
+    if (ui->cbMapSelection->currentText() == "OpenStreetMap") {
+        installOSMPlugin();
+    } else {
+        installESRIPlugin();
+    }
+}
+
+void MainWindow::on_pbMapDPISelectionAccept_clicked() {
+    ui->cbMapDPISelection->setEnabled(false);
+    ui->pbMapDPISelectionAccept->setEnabled(false);
+    if (fileNameShort != ""){
+        ui->pbAddMap->setEnabled(true);
+        ui->cbMapType->setEnabled(true);
+    }
+    ui->pbClearMap->setEnabled(true);
+    if (ui->cbMapDPISelection->currentText() == "Высокое") {
+        emit setMapHighDPI(true);
+    } else {
+        emit setMapHighDPI(false);
+    }
 }
 

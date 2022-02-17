@@ -39,7 +39,13 @@ Item {
             } else {
                 _map.plugin = osmMapPlugin
             }
-            console.log(plugin, _map.plugin)
+            //console.log(plugin, _map.plugin)
+        }
+        onSetMapLineColor: {
+            mapPolyline.line.color = color
+        }
+        onSetMapLineWidth: {
+            mapPolyline.line.width = width
         }
     }
 
@@ -75,11 +81,6 @@ Item {
         locales: "ru"
 
         PluginParameter {
-            id: esriMaxZoomLevel
-            name: "esri.mapping.maximumZoomLevel"
-            value: 18
-        }
-        PluginParameter {
             id: esriCacheDir
             name: "esri.mapping.cache.directory"
         }
@@ -92,12 +93,6 @@ Item {
         height: parent.height
         center: QtPositioning.coordinate(56.394, 61.9334)
         zoomLevel: 12
-        onSupportedMapTypesChanged: {
-            console.log("Supported MapType:")
-            for (var i = 0; i < _map.supportedMapTypes.length; i++) {
-                console.log(i, supportedMapTypes[i].name)
-            }
-        }
         MapPolyline {
             id: mapPolyline
             objectName: "mapPolyline"
