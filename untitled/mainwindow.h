@@ -74,6 +74,7 @@ public:
     Q_INVOKABLE void setMapInfo(double latitude, double longitude, double zoom);
 
 
+
 private:
      Ui::MainWindow *ui;
     QGraphicsScene *scene;
@@ -157,6 +158,13 @@ signals:
     void setMapPlugin(QString plugin);
     void setMapCoordinate(double latitude, double longitude);
     void setMapCenter(double latitude, double longitude);
+
+    void setMapCircleCoordinate(double latitude, double longitude);
+    void setMapCircleRadius(int radius);
+    void setMapCircleBorderColor(QColor bordercolor);
+    void setMapCircleColor(QColor color);
+    void setMapCircleBorderWidth(int borderwidth);
+
     void setMapZoomLevel(double zoom);
     void clearMapCoordinates();
     void setMapType(int typeValue);
@@ -202,6 +210,11 @@ private slots:
     void installOSMPlugin();
     void installESRIPlugin();
     void on_pbMapDPISelectionAccept_clicked();
+    void on_pbMapCircleBorderColor_clicked();
+    void on_sbMapCircleBorderWidth_valueChanged(int arg1);
+    void on_sbMapCircleRadius_valueChanged(int arg1);
+    void on_pbMapCircleColor_clicked();
+    void on_chbMapCirclesDrawing_stateChanged(int arg1);
 };
 
 #endif // MAINWINDOW_H
