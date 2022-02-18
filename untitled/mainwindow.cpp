@@ -20,11 +20,23 @@ MainWindow::MainWindow(QWidget *parent)
     connectSignals();
     ui->lblChartOptimizationsWarning->setVisible(false);
 
+    QPalette palette;
+    palette.setColor(ui->wMapCircleColorDisplay->backgroundRole(), Qt::black);
+    ui->wMapCircleColorDisplay->setPalette(palette);
+    palette.setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
+                     Qt::black);
+    ui->wMapCircleBorderColorDisplay->setPalette(palette);
+    palette.setColor(ui->wMapDrawingColorDisplay->backgroundRole(), Qt::red);
+    ui->wMapDrawingColorDisplay->setPalette(palette);
+    palette.~QPalette();
+
     /*--Настройка баз данных--*/
 
     db = QSqlDatabase::addDatabase("QSQLITE","mainConnection");
     db.setDatabaseName("database.sqlite");
     db.open();
+
+
 
     emit update();
     /*--Установка списков--*/
@@ -208,6 +220,16 @@ void MainWindow::setMapPath() {
     int coords = 0;
     int trueCoords = 0;
     int density = qCeil(ui->sbMapCoordDensityValue->value());
+    QColor mColor =
+        ui->wMapDrawingColorDisplay->palette().color(
+            ui->wMapDrawingColorDisplay->palette()
+                .currentColorGroup(),
+            ui->wMapDrawingColorDisplay->backgroundRole());
+    emit setMapLineColor(mColor);
+    if (ui->chbMapCirclesDrawing->isEnabled() &&
+        ui->chbMapCirclesDrawing->isChecked()){
+
+    }
     while (query->next()) {
         lat = qRadiansToDegrees(query->value(0).toDouble());
         lon = qRadiansToDegrees(query->value(1).toDouble());
@@ -217,6 +239,27 @@ void MainWindow::setMapPath() {
                 emit setMapCoordinate(lat, lon);
                 int progress = qCeil(100 * coords / numberOfRows);
                 emit setMapDrawingProgress(progress);
+                if (ui->chbMapCirclesDrawing->isEnabled() &&
+                    ui->chbMapCirclesDrawing->isChecked()) {
+                    emit setMapCircleCoordinate(lat, lon);
+                    QColor mcBorderColor =
+                        ui->wMapCircleBorderColorDisplay->palette().color(
+                            ui->wMapCircleBorderColorDisplay->palette()
+                                .currentColorGroup(),
+                            ui->wMapCircleBorderColorDisplay->backgroundRole());
+                    QColor mcColor =
+                        ui->wMapCircleColorDisplay->palette().color(
+                            ui->wMapCircleColorDisplay->palette()
+                                .currentColorGroup(),
+                            ui->wMapCircleColorDisplay->backgroundRole());
+                    emit setMapCircleBorderColor(mcBorderColor);
+                    emit setMapCircleColor(mcColor);
+                    emit setMapCircleRadius(ui->sbMapCircleRadius->value());
+                    emit setMapCircleBorderWidth(
+                        ui->sbMapCircleBorderWidth->value());
+                    mcColor.~QColor();
+                    mcBorderColor.~QColor();
+                }
                 ++trueCoords;
             }
         }
@@ -867,6 +910,12 @@ void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
     } else{
         ui->lblMapCoordDensityWarning->setText("");
     }
+
+    if (arg1 >= 300) {
+        ui->chbMapCirclesDrawing->setEnabled(true);
+    } else {
+        ui->chbMapCirclesDrawing->setEnabled(false);
+    }
 }
 
 void MainWindow::on_pbDbTableChangeDescription_clicked() {
@@ -975,6 +1024,7 @@ void MainWindow::on_pbMapDrawingColorSelection_clicked() {
         ui->wMapDrawingColorDisplay->setPalette(palette);
     }
     emit setMapLineColor(colorDialog.currentColor());
+    colorDialog.close();
 }
 
 void MainWindow::on_sbMapDrawingWidthValue_valueChanged(double arg1) {
@@ -994,13 +1044,70 @@ void MainWindow::on_pbMapDPISelectionAccept_clicked() {
     ui->pbMapDPISelectionAccept->setEnabled(false);
     if (fileNameShort != ""){
         ui->pbAddMap->setEnabled(true);
-        ui->cbMapType->setEnabled(true);
     }
+    ui->cbMapType->setEnabled(true);
     ui->pbClearMap->setEnabled(true);
     if (ui->cbMapDPISelection->currentText() == "Высокое") {
         emit setMapHighDPI(true);
     } else {
         emit setMapHighDPI(false);
+    }
+}
+
+void MainWindow::on_pbMapCircleBorderColor_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wMapCircleBorderColorDisplay->setPalette(palette);
+    }
+
+    emit setMapCircleBorderColor(colorDialog.currentColor());
+    colorDialog.close();
+}
+
+
+void MainWindow::on_sbMapCircleBorderWidth_valueChanged(int arg1) {
+    emit setMapCircleBorderWidth(arg1);
+}
+
+
+void MainWindow::on_sbMapCircleRadius_valueChanged(int arg1) {
+    emit setMapCircleRadius(arg1);
+}
+
+
+void MainWindow::on_pbMapCircleColor_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wMapCircleColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wMapCircleColorDisplay->setPalette(palette);
+    }
+    emit setMapCircleColor(colorDialog.currentColor());
+    colorDialog.close();
+}
+
+
+void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
+{
+    qDebug() << arg1;
+    if (arg1 == 2) {
+        ui->pbMapCircleBorderColor->setEnabled(true);
+        ui->pbMapCircleColor->setEnabled(true);
+        ui->sbMapCircleBorderWidth->setEnabled(true);
+        ui->sbMapCircleRadius->setEnabled(true);
+    } else {
+        ui->pbMapCircleBorderColor->setEnabled(false);
+        ui->pbMapCircleColor->setEnabled(false);
+        ui->sbMapCircleBorderWidth->setEnabled(false);
+        ui->sbMapCircleRadius->setEnabled(false);
     }
 }
 
