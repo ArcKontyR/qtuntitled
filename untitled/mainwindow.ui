@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1337</width>
-    <height>698</height>
+    <height>735</height>
    </rect>
   </property>
   <property name="font">
@@ -82,7 +82,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tabMap">
          <property name="sizePolicy">
@@ -1038,84 +1038,7 @@
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout">
-            <item row="1" column="2">
-             <widget class="QLabel" name="lblSqlTableSelectedValue">
-              <property name="text">
-               <string>-</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDBSave">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Выбрать и сохранить файл в базу</string>
-              </property>
-              <property name="checkable">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1" colspan="2">
-             <widget class="QPushButton" name="pbSaveFile">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Сохранить таблицу в файл</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDbTableChangeDescription">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Изменить описание</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="lblSqlTableSelected">
-              <property name="text">
-               <string>Выбрано:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="QTableView" name="tvSqlTable_Tables">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDBTableDelete">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Удалить таблицу</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1" colspan="2">
+            <item row="9" column="1" colspan="2">
              <widget class="QProgressBar" name="prbrDBSave">
               <property name="font">
                <font>
@@ -1142,17 +1065,85 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="1" colspan="2">
+            <item row="2" column="2">
+             <widget class="QLabel" name="lblSqlTableSelectedValue">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QPushButton" name="pbSaveFile">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Сохранить таблицу в файл</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDbTableChangeDescription">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Изменить описание</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
              <widget class="QTextEdit" name="teDBTableDescription"/>
             </item>
-            <item row="5" column="1">
+            <item row="4" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBSave">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Выбрать и сохранить файл в базу</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblSqlTableSelected">
+              <property name="text">
+               <string>Выбрано:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
              <widget class="QLabel" name="lblDBTableDescription">
               <property name="text">
                <string>Описание</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="0" rowspan="9">
+            <item row="3" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBTableDelete">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Удалить таблицу</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="10">
              <widget class="QTableView" name="tvSqlTable">
               <property name="font">
                <font>
@@ -1160,6 +1151,9 @@
                </font>
               </property>
              </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QTreeView" name="tvDatabases"/>
             </item>
            </layout>
           </item>
@@ -1177,7 +1171,7 @@
      <x>0</x>
      <y>0</y>
      <width>1337</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

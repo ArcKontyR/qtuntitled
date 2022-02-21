@@ -118,9 +118,9 @@ public slots:
 
     void updateTables();
     void on_pbAddMap_clicked();
-    //void progressBarDisable();
+    void updateFilePath();
     void on_pbDBSave_clicked();
-    void openTable();
+    void openTable(QSqlDatabase _db);
     void on_pbSetChart_clicked();
     void on_pbSaveFile_clicked();
     void on_pbDBTableDelete_clicked();
@@ -131,7 +131,6 @@ public slots:
     void on_sbMapCenterLonValue_valueChanged(double arg1);
     void on_sbMapZoomLevelValue_valueChanged(double arg1);
     void on_cbMapType_currentIndexChanged(int index);
-    void on_tvSqlTable_Tables_doubleClicked(const QModelIndex &index);
 
     void on_sbMapCoordDensityValue_valueChanged(double arg1);
     void on_pbDbTableChangeDescription_clicked();
@@ -173,7 +172,7 @@ signals:
     void setMapLineColor(QColor color);
     void setMapLineWidth(int width);
 
-    void open();
+    void open(QSqlDatabase);
 
     void setMapDrawingProgress(int progress);
     void setMapDrawingProgressDisabled();
@@ -215,6 +214,7 @@ private slots:
     void on_sbMapCircleRadius_valueChanged(int arg1);
     void on_pbMapCircleColor_clicked();
     void on_chbMapCirclesDrawing_stateChanged(int arg1);
+    void on_tvDatabases_doubleClicked(const QModelIndex &index);
 };
 
 #endif // MAINWINDOW_H
