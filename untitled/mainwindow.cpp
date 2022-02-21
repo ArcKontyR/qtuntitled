@@ -20,25 +20,35 @@ MainWindow::MainWindow(QWidget *parent)
     connectSignals();
     ui->lblChartOptimizationsWarning->setVisible(false);
 
-    QPalette palette;
-    palette.setColor(ui->wMapCircleColorDisplay->backgroundRole(), Qt::black);
-    ui->wMapCircleColorDisplay->setPalette(palette);
-    palette.setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
+    QPalette *palette = new QPalette;
+    palette->setColor(ui->wMapCircleColorDisplay->backgroundRole(), Qt::black);
+    ui->wMapCircleColorDisplay->setPalette(*palette);
+    palette->setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
                      Qt::black);
-    ui->wMapCircleBorderColorDisplay->setPalette(palette);
-    palette.setColor(ui->wMapDrawingColorDisplay->backgroundRole(), Qt::red);
-    ui->wMapDrawingColorDisplay->setPalette(palette);
-    palette.~QPalette();
+    ui->wMapCircleBorderColorDisplay->setPalette(*palette);
+    palette->setColor(ui->wMapDrawingColorDisplay->backgroundRole(), Qt::red);
+    ui->wMapDrawingColorDisplay->setPalette(*palette);
+    palette->~QPalette();
 
+    QFileSystemModel *systemModel = new QFileSystemModel;
+    if (!QDir(QDir::currentPath() + "/databases").exists()) {
+        QDir(QDir::currentPath()).mkdir("databases");
+    }
+    systemModel->setRootPath(QDir::currentPath() + "/databases");
+    systemModel->setNameFilters(QStringList() << "*.sqlite");
+    systemModel->setNameFilterDisables(false);
+    connect(systemModel, SIGNAL(directoryLoaded(QString)), this,
+            SLOT(updateFilePath()));
+
+    ui->tvDatabases->setModel(systemModel);
+    ui->tvDatabases->setRootIndex(systemModel->index(QDir::currentPath() + "/databases"));
     /*--Настройка баз данных--*/
 
     db = QSqlDatabase::addDatabase("QSQLITE","mainConnection");
-    db.setDatabaseName("database.sqlite");
+    db.setDatabaseName("mainDatabase.sqlite");
     db.open();
 
-
-
-    emit update();
+    //emit update();
     /*--Установка списков--*/
     structListFull << "nNavCounter"
                    << "sns_utc"
@@ -151,6 +161,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->prbrChartDrawing->setVisible(false);
 }
 
+void MainWindow::updateFilePath() {
+    if (!QFile(QDir::currentPath() + "/databases/" + fileNameShort + ".sqlite")
+             .exists()) {
+        on_pbDBTableDelete_clicked();
+    }
+}
 void MainWindow::connectSignals() {
     connect(this, SIGNAL(setMapDrawingProgress(int)), this,
             SLOT(onMapDrawingProgressChanged(int)));
@@ -164,9 +180,9 @@ void MainWindow::connectSignals() {
             SLOT(onDBProgressChanged(int)));
     connect(this, SIGNAL(setDBProgressDisabled()), this,
             SLOT(onDBProgressBarVisibilityChanged()));
-    connect(this, SIGNAL(update()), this, SLOT(updateTables()));
 
-    connect(this, SIGNAL(open()), this, SLOT(openTable()));
+    connect(this, SIGNAL(update()), this, SLOT(updateTables()));
+    connect(this, SIGNAL(open(QSqlDatabase)), this, SLOT(openTable(QSqlDatabase)));
 
 }
 MainWindow::~MainWindow()
@@ -208,11 +224,11 @@ int MainWindow::countSelectQueryRows(QSqlQuery *query) {
 void MainWindow::setMapPath() {
     clearMapFromPath();
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "newConnection");
-    _db.setDatabaseName("database.sqlite");
+    _db.setDatabaseName("databases/" + fileNameShort + ".sqlite");
     _db.open();
+    qDebug() << fileNameShort;
     QSqlQuery *query = new QSqlQuery(_db);
-    strSelect = "SELECT B, L FROM '%1'";
-    strSelect = strSelect.arg(fileNameShort);
+    strSelect = "SELECT B, L FROM DataTable";
     query->exec(strSelect);
     int numberOfRows = countSelectQueryRows(query);
     double lat = 0;
@@ -220,16 +236,19 @@ void MainWindow::setMapPath() {
     int coords = 0;
     int trueCoords = 0;
     int density = qCeil(ui->sbMapCoordDensityValue->value());
-    QColor mColor =
-        ui->wMapDrawingColorDisplay->palette().color(
-            ui->wMapDrawingColorDisplay->palette()
-                .currentColorGroup(),
-            ui->wMapDrawingColorDisplay->backgroundRole());
+    QColor mColor = ui->wMapDrawingColorDisplay->palette().color(
+        ui->wMapDrawingColorDisplay->palette().currentColorGroup(),
+        ui->wMapDrawingColorDisplay->backgroundRole());
+    QColor mcBorderColor = ui->wMapCircleBorderColorDisplay->palette().color(
+        ui->wMapCircleBorderColorDisplay->palette().currentColorGroup(),
+        ui->wMapCircleBorderColorDisplay->backgroundRole());
+    QColor mcColor = ui->wMapCircleColorDisplay->palette().color(
+        ui->wMapCircleColorDisplay->palette().currentColorGroup(),
+        ui->wMapCircleColorDisplay->backgroundRole());
+    bool shouldDrawCircles = ui->chbMapCirclesDrawing->isEnabled() &&
+        ui->chbMapCirclesDrawing->isChecked();
     emit setMapLineColor(mColor);
-    if (ui->chbMapCirclesDrawing->isEnabled() &&
-        ui->chbMapCirclesDrawing->isChecked()){
-
-    }
+    mColor.~QColor();
     while (query->next()) {
         lat = qRadiansToDegrees(query->value(0).toDouble());
         lon = qRadiansToDegrees(query->value(1).toDouble());
@@ -239,43 +258,36 @@ void MainWindow::setMapPath() {
                 emit setMapCoordinate(lat, lon);
                 int progress = qCeil(100 * coords / numberOfRows);
                 emit setMapDrawingProgress(progress);
-                if (ui->chbMapCirclesDrawing->isEnabled() &&
-                    ui->chbMapCirclesDrawing->isChecked()) {
+                if (shouldDrawCircles) {
                     emit setMapCircleCoordinate(lat, lon);
-                    QColor mcBorderColor =
-                        ui->wMapCircleBorderColorDisplay->palette().color(
-                            ui->wMapCircleBorderColorDisplay->palette()
-                                .currentColorGroup(),
-                            ui->wMapCircleBorderColorDisplay->backgroundRole());
-                    QColor mcColor =
-                        ui->wMapCircleColorDisplay->palette().color(
-                            ui->wMapCircleColorDisplay->palette()
-                                .currentColorGroup(),
-                            ui->wMapCircleColorDisplay->backgroundRole());
-                    emit setMapCircleBorderColor(mcBorderColor);
-                    emit setMapCircleColor(mcColor);
-                    emit setMapCircleRadius(ui->sbMapCircleRadius->value());
-                    emit setMapCircleBorderWidth(
-                        ui->sbMapCircleBorderWidth->value());
-                    mcColor.~QColor();
-                    mcBorderColor.~QColor();
                 }
                 ++trueCoords;
             }
         }
     }
+    if (shouldDrawCircles){
+        emit setMapCircleBorderColor(mcBorderColor);
+        emit setMapCircleColor(mcColor);
+        emit setMapCircleRadius(ui->sbMapCircleRadius->value());
+        emit setMapCircleBorderWidth(
+            ui->sbMapCircleBorderWidth->value());
+    }
+    mcColor.~QColor();
+    mcBorderColor.~QColor();
     query->~QSqlQuery();
-    _db.close();
-    _db.~QSqlDatabase();
-    _db.removeDatabase(_db.connectionName());
     emit setMapDrawingProgressDisabled();
     emit setMapCenter(lat, lon);
     emit setMapCoordCountValue(trueCoords);
     ui->pbAddMap->setText("Перерисовать маршрут");
+
+    _db.close();
+    _db.~QSqlDatabase();
+    _db.removeDatabase(_db.connectionName());
 }
 
 void MainWindow::on_pbAddMap_clicked() {
     ui->pbAddMap->setEnabled(false);
+    //setMapPath();
     QFuture<void> future = QtConcurrent::run(this, &MainWindow::setMapPath);
     future.waitForFinished();
     if (future.isFinished()) {
@@ -365,70 +377,73 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
         _fileName.split("/")[fileName.split("/").size() - 1];
     int currentRow = 0;
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBSaving");
-    _db.setDatabaseName("database.sqlite");
+    _db.setDatabaseName(QDir::currentPath() + "/databases/" + _fileNameShort + ".sqlite");
     _db.open();
     QSqlQuery *query = new QSqlQuery(_db);
+    QString strSelect = "SELECT * FROM DataTable";
 
-    QString strSelect = "SELECT * FROM '%1'";
+
+
+    QSqlQuery *secquery = new QSqlQuery(db);
+    secquery->exec(strMainTableCreate);
     QString strAddTable = "INSERT INTO MainTable VALUES('%1','%2','%3');";
 
     strAddTable = strAddTable.arg(_fileNameShort)
                       .arg(_description)
                       .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"));
 
-        QString strCreate = "CREATE TABLE '%1' ("
-                       "nNavCounter UINT32_T,"
-                       "sns_utc     UINT32_T,"
-                       "snd_utc     UINT32_T,"
-                       "V_X         DOUBLE,"
-                       "V_Y         DOUBLE,"
-                       "V_Z         DOUBLE,"
-                       "Vair        DOUBLE,"
-                       "roll        DOUBLE,"
-                       "pitch       DOUBLE,"
-                       "head        DOUBLE,"
-                       "head_magn   DOUBLE,"
-                       "B           DOUBLE,"
-                       "L           DOUBLE,"
-                       "h           DOUBLE,"
-                       "Wx          DOUBLE,"
-                       "Wy          DOUBLE,"
-                       "Wz          DOUBLE,"
-                       "alfa        DOUBLE,"
-                       "beta        DOUBLE,"
-                       "H_baro      DOUBLE,"
-                       "Pst         DOUBLE,"
-                       "Tnv         DOUBLE,"
-                       "Nx          DOUBLE,"
-                       "Ny          DOUBLE,"
-                       "Nz          DOUBLE,"
-                       "coarse      DOUBLE,"
-                       "WindDir     DOUBLE,"
-                       "WindV       DOUBLE,"
-                       "op_ns       UINT8_T,"
-                       "op_ver      UINT8_T,"
-                       "np_ns       UINT8_T,"
-                       "np_ver      UINT8_T,"
-                       "np_num      UINT8_T,"
-                       "align_time  UINT8_T,"
-                       "nav_mode    UINT8_T,"
-                       "nUDPCounter UINT32_T,"
-                       "unix_time   UINT64_T,"
-                       "work_time   UINT16_T,"
-                       "priority    UINT8_T,"
-                       "gps_glo     UINT8_T,"
-                       "sns_mode    UINT8_T,"
-                       "sns_cmd     UINT8_T,"
-                       "pni_bits    UINT32_T,"
-                       "fix_bits    UINT32_T,"
-                       "recv_status UINT32_T"
-                       ");";
+    QString strCreate = "CREATE TABLE DataTable ("
+                        "nNavCounter UINT32_T,"
+                        "sns_utc     UINT32_T,"
+                        "snd_utc     UINT32_T,"
+                        "V_X         DOUBLE,"
+                        "V_Y         DOUBLE,"
+                        "V_Z         DOUBLE,"
+                        "Vair        DOUBLE,"
+                        "roll        DOUBLE,"
+                        "pitch       DOUBLE,"
+                        "head        DOUBLE,"
+                        "head_magn   DOUBLE,"
+                        "B           DOUBLE,"
+                        "L           DOUBLE,"
+                        "h           DOUBLE,"
+                        "Wx          DOUBLE,"
+                        "Wy          DOUBLE,"
+                        "Wz          DOUBLE,"
+                        "alfa        DOUBLE,"
+                        "beta        DOUBLE,"
+                        "H_baro      DOUBLE,"
+                        "Pst         DOUBLE,"
+                        "Tnv         DOUBLE,"
+                        "Nx          DOUBLE,"
+                        "Ny          DOUBLE,"
+                        "Nz          DOUBLE,"
+                        "coarse      DOUBLE,"
+                        "WindDir     DOUBLE,"
+                        "WindV       DOUBLE,"
+                        "op_ns       UINT8_T,"
+                        "op_ver      UINT8_T,"
+                        "np_ns       UINT8_T,"
+                        "np_ver      UINT8_T,"
+                        "np_num      UINT8_T,"
+                        "align_time  UINT8_T,"
+                        "nav_mode    UINT8_T,"
+                        "nUDPCounter UINT32_T,"
+                        "unix_time   UINT64_T,"
+                        "work_time   UINT16_T,"
+                        "priority    UINT8_T,"
+                        "gps_glo     UINT8_T,"
+                        "sns_mode    UINT8_T,"
+                        "sns_cmd     UINT8_T,"
+                        "pni_bits    UINT32_T,"
+                        "fix_bits    UINT32_T,"
+                        "recv_status UINT32_T"
+                        ");";
 
-    strCreate = strCreate.arg(_fileNameShort);
     ui->prbrDBSave->setValue(5);
     if (!query->exec(strCreate)) {
     } else {
-        query->exec(strAddTable);
+        secquery->exec(strAddTable);
         if (file->open(QIODevice::ReadOnly)) {
             QDataStream stream(file);
             stream.setByteOrder(QDataStream::LittleEndian);
@@ -460,7 +475,7 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
 
                 if (tmpData.pni_bits != 0) {
                     QString strInsert =
-                        "INSERT INTO '%1' (nNavCounter, sns_utc, snd_utc, "
+                        "INSERT INTO DataTable (nNavCounter, sns_utc, snd_utc, "
                         "V_X, V_Y, V_Z, Vair, roll, pitch, head,head_magn, B, "
                         "L, h, "
                         "Wx, Wy,Wz, alfa, beta, H_baro, Pst, Tnv,Nx, Ny, Nz, "
@@ -470,14 +485,14 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                         "work_time, priority, gps_glo, sns_mode, sns_cmd, "
                         "pni_bits,fix_bits, recv_status) "
                         "VALUES "
-                        "(%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%"
+                        "(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%"
                         "17,%18,%19,%20,%21,"
                         "%22,%23,%24,%25,%26,%27,%28,%29,%30,%31,%32,%33,%34,%"
-                        "35,%36,%37,%38,%39,%40,%41,%42,%43,%44,%45,%46);";
+                        "35,%36,%37,%38,%39,%40,%41,%42,%43,%44,%45);";
                     int precision = 14;
                     char format = 'f';
                     strInsert =
-                        strInsert.arg(_fileNameShort)
+                        strInsert
                             .arg(QString::number(tmpData.nNavCounter))
                             .arg(QString::number(tmpData.sns_utc))
                             .arg(QString::number(tmpData.snd_utc))
@@ -577,15 +592,14 @@ void MainWindow::on_pbDBSave_clicked() {
 
 }
 
-void MainWindow::openTable() {
-
+void MainWindow::openTable(QSqlDatabase _db) {
+    qDebug() << "signal received";
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
     }
 
-    QSqlQuery *query = new QSqlQuery(db);
-    QString strSelect = "SELECT * FROM '%1'";
-    strSelect = strSelect.arg(fileNameShort);
+    QSqlQuery *query = new QSqlQuery(_db);
+    QString strSelect = "SELECT * FROM DataTable";
 
     QSqlQueryModel *sqlModel = new QSqlQueryModel;
 
@@ -635,10 +649,9 @@ void MainWindow::on_pbSetChart_clicked() {
 
 
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "chartConnection");
-    _db.setDatabaseName("database.sqlite");
+    _db.setDatabaseName(QDir::currentPath()+"/databases/"+fileNameShort+".sqlite");
     _db.open();
     emit setChartDatabase(_db);
-    emit setChartTableName(fileNameShort);
     emit setChartFixXChecked(ui->chbChartFixAxisX->isChecked());
     emit setChartFixYChecked(ui->chbChartFixAxisY->isChecked());
     emit setChartDBRow(structListVarX.at(ui->cbChartRow->currentIndex()));
@@ -679,9 +692,12 @@ void MainWindow::on_pbDeleteChart_clicked() { emit clearChart();
 }
 
 void MainWindow::on_pbSaveFile_clicked() {
-    QSqlQuery *query = new QSqlQuery(db);
-    QString strSelect = "SELECT * FROM '%1'";
-    strSelect = strSelect.arg(fileNameShort);
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBToFile");
+    _db.setDatabaseName(QDir::currentPath() + "/databases/" + fileNameShort +
+                        ".sqlite");
+    _db.open();
+    QSqlQuery *query = new QSqlQuery(_db);
+    QString strSelect = "SELECT * FROM DataTable";
     if (!query->exec(strSelect)) {
         //qDebug() << query->lastError();
     }
@@ -795,8 +811,11 @@ void MainWindow::on_pbSaveFile_clicked() {
         }
         file->close();
     }
-    query->clear();
-    //qDebug() << fileName;
+    query->~QSqlQuery();
+    _db.close();
+    _db.~QSqlDatabase();
+    _db.removeDatabase(_db.connectionName());
+
 }
 
 
@@ -804,32 +823,34 @@ void MainWindow::on_pbDBTableDelete_clicked() {
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
     }
+    QFile::remove(QDir::currentPath() + "/databases/" + fileNameShort +
+                  ".sqlite");
     QSqlQuery *query = new QSqlQuery(db);
-    QString strDropTable = "DROP TABLE '%1'";
     QString strDeleteTable = "DELETE FROM MainTable WHERE name = '%1'";
-
-    strDropTable = strDropTable.arg(fileNameShort);
     strDeleteTable = strDeleteTable.arg(fileNameShort);
-    query->exec(strDropTable);
     query->exec(strDeleteTable);
-    updateTables();
-    // ui->tvSqlTable
     query->~QSqlQuery();
+    fileNameShort = "";
+    ui->lblSqlTableSelectedValue->setText("");
+    ui->lblMapSelectedTableValue->setText("");
+    ui->teDBTableDescription->setText("");
+    ui->pbDbTableChangeDescription->setEnabled(false);
 
+    ui->pbAddMap->setEnabled(false);
+    ui->pbSetChart->setEnabled(false);
+    ui->pbDeleteChart->setEnabled(false);
 }
 
 void MainWindow::updateTables() {
-    if (ui->tvSqlTable_Tables->model() != nullptr) {
-        ui->tvSqlTable_Tables->model()->~QAbstractItemModel();
-    }
-    if (ui->tvSqlTable->model() != nullptr) {
-        ui->tvSqlTable->model()->~QAbstractItemModel();
-    }
+//    QFileSystemModel *systemModel = new QFileSystemModel;
+//    if (!QDir(QDir::currentPath() + "/databases").exists()) {
+//        QDir(QDir::currentPath()).mkdir("databases");
+//    }
+//    systemModel->setRootPath(QDir::currentPath()+ "/databases");
+//    ui->tvDatabases->setModel(systemModel);
+//    ui->tvDatabases->setRootIndex(systemModel->index(QDir::currentPath() + "/databases"));
 
-    QSqlQuery *query = new QSqlQuery(db);
-    QSqlQueryModel *sqlModel = new QSqlQueryModel;
-
-    if (query->exec(strMainTableSelect)) {
+    /*if (query->exec(strMainTableSelect)) {
         sqlModel->setQuery(*query);
         if (sqlModel->lastError().isValid()) {
             qDebug() << sqlModel->lastError() << "model error";
@@ -870,32 +891,11 @@ void MainWindow::updateTables() {
     ui->tvSqlTable_Tables->setModel(sqlModel);
     query->clear();
 
-    query->~QSqlQuery();
+    query->~QSqlQuery();*/
 }
-
-void MainWindow::on_tvSqlTable_Tables_doubleClicked(const QModelIndex &index) {
-    if (ui->tvSqlTable->model() != nullptr) {
-        ui->tvSqlTable->model()->~QAbstractItemModel();
-    }
-    ui->tvSqlTable_Tables->indexAt(QPoint(index.row(), 0));
-    fileNameShort = index.siblingAtColumn(0).data().toString();
-    ui->lblSqlTableSelectedValue->setText(fileNameShort);
-    ui->lblMapSelectedTableValue->setText(fileNameShort);
-    ui->teDBTableDescription->setText(index.siblingAtColumn(1).data().toString());
-    ui->pbDbTableChangeDescription->setEnabled(true);
-
-    ui->pbAddMap->setEnabled(true);
-    ui->pbClearMap->setEnabled(true);
-    ui->cbMapType->setEnabled(true);
-    ui->pbSetChart->setEnabled(true);
-    ui->pbDeleteChart->setEnabled(true);
-    //openTable();
-    emit open();
-}
-
 
 void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
-    if (arg1 >= 101 && arg1 <= 500) {
+    if (arg1 >= 301 && arg1 <= 500) {
         ui->lblMapCoordDensityWarning->setText(
             "Для лучшего качества уменьшите значение параметра");
         ui->lblMapCoordDensityWarning->setStyleSheet("color: orange; font: 10pt \"Century Gothic\";");
@@ -1109,5 +1109,41 @@ void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
         ui->sbMapCircleBorderWidth->setEnabled(false);
         ui->sbMapCircleRadius->setEnabled(false);
     }
+}
+
+
+void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
+    qDebug() << index.siblingAtColumn(0).data().toString();
+    if (ui->tvSqlTable->model() != nullptr) {
+        ui->tvSqlTable->model()->~QAbstractItemModel();
+    }
+    // ui->tvDatabases->indexAt(QPoint(index.row(), 0));
+    QString fileName = index.siblingAtColumn(0).data().toString();
+    fileNameShort = fileName.split(".")[0];
+
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "tableOpened");
+    _db.setDatabaseName("databases/" + fileName);
+    _db.open();
+
+    QString strSelect = "SELECT * FROM MainTable WHERE name = '%1'";
+    strSelect = strSelect.arg(fileNameShort);
+    QSqlQuery *query = new QSqlQuery(db);
+    query->exec(strSelect);
+    query->first();
+    ui->lblSqlTableSelectedValue->setText(fileNameShort);
+    ui->lblMapSelectedTableValue->setText(fileNameShort);
+    ui->teDBTableDescription->setText(query->value(1).toString());
+    ui->pbDbTableChangeDescription->setEnabled(true);
+    //
+    ui->pbAddMap->setEnabled(true);
+    ui->pbClearMap->setEnabled(true);
+    // ui->cbMapType->setEnabled(true);
+    ui->pbSetChart->setEnabled(true);
+    ui->pbDeleteChart->setEnabled(true);
+    openTable(_db);
+    //emit open(_db);
+    _db.close();
+    _db.~QSqlDatabase();
+    _db.removeDatabase(_db.connectionName());
 }
 

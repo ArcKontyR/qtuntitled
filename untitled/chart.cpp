@@ -95,11 +95,11 @@ void Chart::compute() {
     int truePoints = 0;
 
     if (row == "i") {
-        strSelect = "SELECT %1 FROM '%2'";
-        strSelect = strSelect.arg(column).arg(tableName);
+        strSelect = "SELECT %1 FROM DataTable";
+        strSelect = strSelect.arg(column);
     } else {
-        strSelect = "SELECT %1, %2 FROM '%3'";
-        strSelect = strSelect.arg(row).arg(column).arg(tableName);
+        strSelect = "SELECT %1, %2 FROM DataTable";
+        strSelect = strSelect.arg(row).arg(column);
     }
     query->exec(strSelect);
     emit getNumberOfRows(query);
