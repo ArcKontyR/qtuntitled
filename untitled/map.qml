@@ -10,7 +10,7 @@ Item {
         onSetMapCoordinate: {
             mapPolyline.addCoordinate(QtPositioning.coordinate(latitude,
                                                                longitude))
-
+            //console.log(latitude, longitude)
             //console.log(_map.mapItems.length,
             // _map.mapItems[_map.mapItems.length])
         }

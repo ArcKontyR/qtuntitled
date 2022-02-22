@@ -92,12 +92,11 @@ private:
 
     QSqlDatabase db;
 
-
-    QStringList structListX;
     QStringList structListVarX;
-    QStringList structList;
     QStringList structListVariables;
     QStringList structListFull;
+    QStringList structListTitlesX;
+    QStringList structListTitlesY;
 
     QObject *qmlPage;
     QObject *mapPolyline;
@@ -111,12 +110,12 @@ private:
     QString column;
     QString strSelect;
     bool fixAxisXWasChecked;
+    bool loadedFileCorrupted = false;
 
     void connectSignals();
 
 public slots:
 
-    void updateTables();
     void on_pbAddMap_clicked();
     void updateFilePath();
     void on_pbDBSave_clicked();
@@ -144,10 +143,13 @@ public slots:
     void onMapDrawingProgressBarVisibilityChanged();
     void onMapCoordCountValueChanged(int coords);
 
+
     void onChartDrawingProgressChanged(int progress);
     void onChartDrawingProgressBarVisibilityChanged();
     void onChartPointsValueChanged(int coords);
 
+    void dbError();
+    void dbErrorClear();
     void saveDB(int _numberOfRows, QString _fileName, QString _description);
     void onDBProgressChanged(int progress);
     void onDBProgressBarVisibilityChanged();
@@ -157,13 +159,11 @@ signals:
     void setMapPlugin(QString plugin);
     void setMapCoordinate(double latitude, double longitude);
     void setMapCenter(double latitude, double longitude);
-
     void setMapCircleCoordinate(double latitude, double longitude);
     void setMapCircleRadius(int radius);
     void setMapCircleBorderColor(QColor bordercolor);
     void setMapCircleColor(QColor color);
     void setMapCircleBorderWidth(int borderwidth);
-
     void setMapZoomLevel(double zoom);
     void clearMapCoordinates();
     void setMapType(int typeValue);
@@ -171,12 +171,11 @@ signals:
     void setMapHighDPI(bool value);
     void setMapLineColor(QColor color);
     void setMapLineWidth(int width);
-
-    void open(QSqlDatabase);
-
     void setMapDrawingProgress(int progress);
     void setMapDrawingProgressDisabled();
     void setMapCoordCountValue(int coords);
+
+    void open(QSqlDatabase);
 
     void setChartDatabase(QSqlDatabase);
     void setChartTableName(QString);
@@ -184,8 +183,12 @@ signals:
     void setChartFixYChecked(bool);
     void setChartDBRow(QString);
     void setChartDBColumn(QString);
+    void setChartDBTitleRow(QString);
+    void setChartDBTitleColumn(QString);
     void setChartNumberOfRows(int);
     void setChartAODensity(int);
+    void setChartPen(QPen);
+    void setChartTheme(int);
     void drawChart();
     void clearChart();
     void setChartUseOptimization(bool);
@@ -194,7 +197,7 @@ signals:
     void setChartDrawingProgressDisabled();
     void setChartPointsValue(int);
 
-    void update();
+    void dbErrorAppeared();
     void setDBProgress(int);
     void setDBProgressDisabled();
 private slots:
@@ -215,6 +218,9 @@ private slots:
     void on_pbMapCircleColor_clicked();
     void on_chbMapCirclesDrawing_stateChanged(int arg1);
     void on_tvDatabases_doubleClicked(const QModelIndex &index);
+    void on_pbChartPenColorSelection_clicked();
+    void on_cbChartTheme_currentIndexChanged(int index);
+    void on_sbChartPenWidth_valueChanged(int arg1);
 };
 
 #endif // MAINWINDOW_H

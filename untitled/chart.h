@@ -18,7 +18,6 @@ public:
 
 public slots:
     void setDatabase(QSqlDatabase);
-    void setSeries();
     void setPen(QPen);
     void drawPoint(qreal, qreal);
     void chartIsIndex(bool isIndex = false);
@@ -29,21 +28,25 @@ public slots:
     void setFixYChecked(bool);
     void setDBRow(QString);
     void setDBColumn(QString);
+    void setDBTitleRow(QString);
+    void setDBTitleColumn(QString);
     void setNumberOfRows(int);
     void setUseOptimization(bool);
     void setUseAltOptimization(bool);
     void setAODensity(int);
+    void setChartTheme(int);
 private:
     QSqlDatabase db;
     QString tableName;
-    QPen defaultPen = QPen(Qt::black, 1);
-    QPen pen = QPen(NULL_PEN);
+    QPen pen;
     QLineSeries *m_series = new QLineSeries;
     QValueAxis *m_axisX = new QValueAxis;
     QDateTimeAxis *m_daxisX = new QDateTimeAxis;
     QValueAxis *m_axisY = new QValueAxis;
 
     int numberOfRows;
+    QString titleRow = "";
+    QString titleColumn = "";
     QString row = "";
     QString column = "";
     QString strSelect = "";

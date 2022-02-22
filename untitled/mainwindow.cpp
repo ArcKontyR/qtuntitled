@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     // this->setFixedSize(this->width(), this->height());
     connectSignals();
     ui->lblChartOptimizationsWarning->setVisible(false);
+    ui->lblDBErrorWarning->setVisible(false);
+    setFont(QFont("Century Gothic",10));
 
     QPalette *palette = new QPalette;
     palette->setColor(ui->wMapCircleColorDisplay->backgroundRole(), Qt::black);
@@ -28,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->wMapCircleBorderColorDisplay->setPalette(*palette);
     palette->setColor(ui->wMapDrawingColorDisplay->backgroundRole(), Qt::red);
     ui->wMapDrawingColorDisplay->setPalette(*palette);
+    palette->setColor(ui->wChartPenColorDisplay->backgroundRole(), Qt::black);
+    ui->wChartPenColorDisplay->setPalette(*palette);
     palette->~QPalette();
 
     QFileSystemModel *systemModel = new QFileSystemModel;
@@ -48,8 +52,55 @@ MainWindow::MainWindow(QWidget *parent)
     db.setDatabaseName("mainDatabase.sqlite");
     db.open();
 
-    //emit update();
     /*--Установка списков--*/
+    structListTitlesX << "Индекс"
+                      << "Время SNS"
+                      << "Время SND";
+    structListTitlesY
+        << "Счетчик работы навигационного алгоритма"
+        << "Продольная составляющая земной скорости в ЛКС"
+        << "Вертикальная составляющая земной скорости в ЛКС"
+        << "Боковая составляющая земной скорости в ЛКС"
+        << "Воздушная скорость, м/c"
+        << "Крен, радиан"
+        << "Тангаж, радиан"
+        << "Курс, радиан"
+        << "Курс магнитный, радиан"
+        << "Широта в WGS-84, радианы"
+        << "Долгота в WGS-84, радианы"
+        << "Высота в WGS-84, метры"
+        << "Проекция угловой скорости на ось Ox в ССК, радиан/с"
+        << "Проекция угловой скорости на ось Oy в ССК, радиан/с"
+        << "Проекция угловой скорости на ось Oz в ССК, радиан/с"
+        << "Угол атаки, радиан"
+        << "Угол скольжения, радиан"
+        << "Барометрическая высота, м"
+        << "Статическое давление, Па"
+        << "Температура наружного воздуха °, К"
+        << "Продольная перегрузка в ССК, g"
+        << "Вертикальная перегрузка в ССК, g"
+        << "Боковая перегрузка в ССК, g"
+        << "Путевой угол, радианы"
+        << "Направление ветра, радиан"
+        << "Скорость ветра, м/c"
+        << "Номер прошивки ОВ"
+        << "Версия ОВ"
+        << "Номер прошивки НВ"
+        << "Версия НВ"
+        << "Номер НВ"
+        << "Время до окончания выставки или прогрева"
+        << "режим работы БИВ"
+        << "Счетчик UDP пакетов"
+        << "Время системы в секундах"
+        << "Время наработки БИВ в часах"
+        << "Приоритет источника (0 - НАВИГАЦИОННЫЙ, 1 - РЕЗЕРВНЫЙ)"
+        << "мл. байт число GPS, старший - ГЛОНАСС"
+        << "Режим работы СНС: @sa UNIT_PNI_SNS_MODE"
+        << "Режим работы СНС: @sa UNIT_PNI_SNS_CMD"
+        << "Это биты достоверности данных  @sa UNIT_PNI_PNI_BITS"
+        << "Признаки исправности устройств @sa UNIT_PNI_FIX_BITS"
+        << "Cтатус приема данных для unit_pni_process_canmsg и "
+           "unit_pni_get_data";
     structListFull << "nNavCounter"
                    << "sns_utc"
                    << "snd_utc"
@@ -146,13 +197,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     /*--Настройка карты--*/
 
-    ui->qwMap->setSource(QUrl("qrc:/map.qml"));
-    ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    engine = ui->qwMap->engine();
-    context = engine->rootContext();
-    context->setContextProperty(QStringLiteral("main"), this);
-    setMapInfo(56.394, 61.9334, 12);
-    emit setMapOfflineDirectory(QDir::currentPath() + "/offline_tiles/");
+
 
     /*--Настройка прогресс бара--*/
 
@@ -175,13 +220,12 @@ void MainWindow::connectSignals() {
     connect(this, SIGNAL(setMapCoordCountValue(int)), this,
             SLOT(onMapCoordCountValueChanged(int)));
 
-
+    connect(this, SIGNAL(dbErrorAppeared()), this, SLOT(dbError()));
     connect(this, SIGNAL(setDBProgress(int)), this,
             SLOT(onDBProgressChanged(int)));
     connect(this, SIGNAL(setDBProgressDisabled()), this,
             SLOT(onDBProgressBarVisibilityChanged()));
 
-    connect(this, SIGNAL(update()), this, SLOT(updateTables()));
     connect(this, SIGNAL(open(QSqlDatabase)), this, SLOT(openTable(QSqlDatabase)));
 
 }
@@ -226,7 +270,6 @@ void MainWindow::setMapPath() {
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "newConnection");
     _db.setDatabaseName("databases/" + fileNameShort + ".sqlite");
     _db.open();
-    qDebug() << fileNameShort;
     QSqlQuery *query = new QSqlQuery(_db);
     strSelect = "SELECT B, L FROM DataTable";
     query->exec(strSelect);
@@ -303,9 +346,6 @@ void MainWindow::on_pbClearMap_clicked() {
 }
 
 void MainWindow::setMapInfo(double latitude, double longitude, double zoom) {
-    ui->lblMapCenterLatValue->setText(QString::number(latitude));
-    ui->lblMapCenterLonValue->setText(QString::number(longitude));
-    ui->lblMapZoomValue->setText(QString::number(zoom));
     ui->sbMapCenterLatValue->setValue(latitude);
     ui->sbMapCenterLonValue->setValue(longitude);
     ui->sbMapZoomLevelValue->setValue(zoom);
@@ -381,8 +421,6 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     _db.open();
     QSqlQuery *query = new QSqlQuery(_db);
     QString strSelect = "SELECT * FROM DataTable";
-
-
 
     QSqlQuery *secquery = new QSqlQuery(db);
     secquery->exec(strMainTableCreate);
@@ -472,7 +510,21 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
 
                 int progress = qCeil(100 * currentRow / _numberOfRows);
                 emit setDBProgress(progress);
-
+                if (tmpData.recv_status != 0) {
+                    qDebug() << "loading error";
+                    emit dbErrorAppeared();
+                    emit setDBProgressDisabled();
+                    tmpData.~BpiData();
+                    file->close();
+                    stream.~QDataStream();
+                    file->~QFile();
+                    _db.commit();
+                    query->~QSqlQuery();
+                    _db.close();
+                    _db.~QSqlDatabase();
+                    _db.removeDatabase(_db.connectionName());
+                    return;
+                }
                 if (tmpData.pni_bits != 0) {
                     QString strInsert =
                         "INSERT INTO DataTable (nNavCounter, sns_utc, snd_utc, "
@@ -560,8 +612,17 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     _db.~QSqlDatabase();
     _db.removeDatabase(_db.connectionName());
 
-    emit update();
     emit setDBProgressDisabled();
+}
+
+void MainWindow::dbError() {
+    ui->lblDBErrorWarning->setVisible(true);
+    loadedFileCorrupted = true;
+    QTimer::singleShot(2000, this, SLOT(dbErrorClear()));
+}
+
+void MainWindow::dbErrorClear() {
+    ui->lblDBErrorWarning->setVisible(false);
 }
 
 void MainWindow::on_pbDBSave_clicked() {
@@ -587,13 +648,21 @@ void MainWindow::on_pbDBSave_clicked() {
             .result();
     file->close();
     file->~QFile();
-
+    ui->tvDatabases->setEnabled(false);
+    QFuture<void> future =
     QtConcurrent::run(this, &MainWindow::saveDB,numberOfRows,fileName,description);
-
+    future.waitForFinished();
+    if (future.isFinished()) {
+        ui->tvDatabases->setEnabled(true);
+        if (loadedFileCorrupted) {
+            on_pbDBTableDelete_clicked();
+            loadedFileCorrupted = false;
+        }
+    }
+    future.~QFuture();
 }
 
 void MainWindow::openTable(QSqlDatabase _db) {
-    qDebug() << "signal received";
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
     }
@@ -636,6 +705,10 @@ void MainWindow::on_pbSetChart_clicked() {
             SLOT(setDBRow(QString)));
     connect(this, SIGNAL(setChartDBColumn(QString)), chart,
             SLOT(setDBColumn(QString)));
+    connect(this, SIGNAL(setChartDBTitleRow(QString)), chart,
+            SLOT(setDBTitleRow(QString)));
+    connect(this, SIGNAL(setChartDBTitleColumn(QString)), chart,
+            SLOT(setDBTitleColumn(QString)));
     connect(chart, SIGNAL(getNumberOfRows(QSqlQuery *)), this,
             SLOT(countSelectQueryRows(QSqlQuery *)));
     connect(this, SIGNAL(setChartNumberOfRows(int)), chart,
@@ -646,6 +719,9 @@ void MainWindow::on_pbSetChart_clicked() {
             SLOT(onChartDrawingProgressBarVisibilityChanged()));
     connect(chart, SIGNAL(setPointsValue(int)), this,
             SLOT(onChartPointsValueChanged(int)));
+    connect(this, SIGNAL(setChartPen(QPen)), chart, SLOT(setPen(QPen)));
+    connect(this, SIGNAL(setChartTheme(int)), chart, SLOT(setChartTheme(int)));
+
 
 
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "chartConnection");
@@ -657,11 +733,25 @@ void MainWindow::on_pbSetChart_clicked() {
     emit setChartDBRow(structListVarX.at(ui->cbChartRow->currentIndex()));
     emit setChartDBColumn(
         structListVariables.at(ui->cbChartColumn->currentIndex()));
+    emit setChartDBTitleRow(structListTitlesX.at(ui->cbChartRow->currentIndex()));
+    emit setChartDBTitleColumn(structListTitlesY.at(ui->cbChartColumn->currentIndex()));
     emit setChartUseOptimization(ui->chbChartUseOptimization->isChecked());
     emit setChartUseAltOptimization(ui->chbChartUseAltOptimization->isChecked());
+    qDebug() << structListTitlesX.at(ui->cbChartRow->currentIndex())
+             << ui->cbChartRow->currentText();
+    qDebug() << structListTitlesY.at(ui->cbChartColumn->currentIndex())
+             << ui->cbChartColumn->currentText();
     emit setChartAODensity(qCeil(ui->sbChartAODensity->value()));
-    emit clearChart();
+    emit setChartTheme(ui->cbChartTheme->currentIndex());
     emit drawChart();
+    if (ui->pbChartPenColorSelection->isEnabled()) {
+        emit setChartPen(
+            QPen(QColor(ui->wChartPenColorDisplay->palette().color(
+                     ui->wChartPenColorDisplay->palette().currentColorGroup(),
+                     ui->wChartPenColorDisplay->backgroundRole())),
+                 ui->sbChartPenWidth->value(), Qt::SolidLine, Qt::RoundCap,
+                 Qt::RoundJoin));
+    }
 
     ui->chartView->setChart(chart);
 
@@ -671,6 +761,10 @@ void MainWindow::on_pbSetChart_clicked() {
     connect(this, SIGNAL(clearChart()), chart, SLOT(clearChart()));
     connect(chart, SIGNAL(setPointsValue(int)), this,
             SLOT(onChartPointsValueChanged(int)));
+    connect(this, SIGNAL(setChartTheme(int)), chart, SLOT(setChartTheme(int)));
+    connect(this, SIGNAL(setChartPen(QPen)), chart, SLOT(setPen(QPen)));
+    QSqlDatabase::database("chartConnection").close();
+    QSqlDatabase::removeDatabase("chartConnection");
 }
 
 void MainWindow::onChartDrawingProgressChanged(int progress) {
@@ -699,7 +793,6 @@ void MainWindow::on_pbSaveFile_clicked() {
     QSqlQuery *query = new QSqlQuery(_db);
     QString strSelect = "SELECT * FROM DataTable";
     if (!query->exec(strSelect)) {
-        //qDebug() << query->lastError();
     }
     //"	" - табуляция
     int i = 0;
@@ -815,14 +908,15 @@ void MainWindow::on_pbSaveFile_clicked() {
     _db.close();
     _db.~QSqlDatabase();
     _db.removeDatabase(_db.connectionName());
-
 }
-
 
 void MainWindow::on_pbDBTableDelete_clicked() {
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
     }
+    QString connectionName = "dbOpened";
+    QSqlDatabase::database(connectionName).close();
+    QSqlDatabase::removeDatabase(connectionName);
     QFile::remove(QDir::currentPath() + "/databases/" + fileNameShort +
                   ".sqlite");
     QSqlQuery *query = new QSqlQuery(db);
@@ -839,59 +933,6 @@ void MainWindow::on_pbDBTableDelete_clicked() {
     ui->pbAddMap->setEnabled(false);
     ui->pbSetChart->setEnabled(false);
     ui->pbDeleteChart->setEnabled(false);
-}
-
-void MainWindow::updateTables() {
-//    QFileSystemModel *systemModel = new QFileSystemModel;
-//    if (!QDir(QDir::currentPath() + "/databases").exists()) {
-//        QDir(QDir::currentPath()).mkdir("databases");
-//    }
-//    systemModel->setRootPath(QDir::currentPath()+ "/databases");
-//    ui->tvDatabases->setModel(systemModel);
-//    ui->tvDatabases->setRootIndex(systemModel->index(QDir::currentPath() + "/databases"));
-
-    /*if (query->exec(strMainTableSelect)) {
-        sqlModel->setQuery(*query);
-        if (sqlModel->lastError().isValid()) {
-            qDebug() << sqlModel->lastError() << "model error";
-        }
-        // qDebug() << query->lastError() << "query error";
-
-    } else {
-        query->exec(strMainTableCreate);
-        query->exec(strMainTableSelect);
-    }
-    if (query->isValid()) {
-        fileNameShort =
-            ui->tvSqlTable_Tables->model()->index(0, 0).data().toString();
-        ui->lblSqlTableSelectedValue->setText(fileNameShort);
-        ui->lblMapSelectedTableValue->setText(fileNameShort);
-        ui->teDBTableDescription->setText(
-            ui->tvSqlTable_Tables->model()->index(0, 1).data().toString());
-        ui->pbDbTableChangeDescription->setEnabled(true);
-
-
-        ui->pbAddMap->setEnabled(true);
-        ui->pbClearMap->setEnabled(true);
-        ui->cbMapType->setEnabled(true);
-        ui->pbSetChart->setEnabled(true);
-        ui->pbDeleteChart->setEnabled(true);
-    } else {
-        fileNameShort = "";
-        ui->lblSqlTableSelectedValue->setText("");
-        ui->lblMapSelectedTableValue->setText("");
-        ui->teDBTableDescription->setText("");
-        ui->pbDbTableChangeDescription->setEnabled(false);
-
-        ui->pbAddMap->setEnabled(false);
-        ui->cbMapType->setEnabled(false);
-        ui->pbSetChart->setEnabled(false);
-        ui->pbDeleteChart->setEnabled(false);
-    }
-    ui->tvSqlTable_Tables->setModel(sqlModel);
-    query->clear();
-
-    query->~QSqlQuery();*/
 }
 
 void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
@@ -926,7 +967,6 @@ void MainWindow::on_pbDbTableChangeDescription_clicked() {
     QSqlQuery *query = new QSqlQuery(db);
     query->exec(strUpdate);
     query->~QSqlQuery();
-    emit update();
 }
 
 void MainWindow::on_cbChartRow_currentIndexChanged(int index) {
@@ -1032,6 +1072,13 @@ void MainWindow::on_sbMapDrawingWidthValue_valueChanged(double arg1) {
 }
 
 void MainWindow::on_pbMapSelectionAccept_clicked() {
+    ui->qwMap->setSource(QUrl("qrc:/map.qml"));
+    ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    engine = ui->qwMap->engine();
+    context = engine->rootContext();
+    context->setContextProperty(QStringLiteral("main"), this);
+    setMapInfo(56.394, 61.9334, 12);
+    emit setMapOfflineDirectory(QDir::currentPath() + "/offline_tiles/");
     if (ui->cbMapSelection->currentText() == "OpenStreetMap") {
         installOSMPlugin();
     } else {
@@ -1040,6 +1087,8 @@ void MainWindow::on_pbMapSelectionAccept_clicked() {
 }
 
 void MainWindow::on_pbMapDPISelectionAccept_clicked() {
+
+
     ui->cbMapDPISelection->setEnabled(false);
     ui->pbMapDPISelectionAccept->setEnabled(false);
     if (fileNameShort != ""){
@@ -1063,6 +1112,7 @@ void MainWindow::on_pbMapCircleBorderColor_clicked() {
         palette.setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
                          colorDialog.currentColor());
         ui->wMapCircleBorderColorDisplay->setPalette(palette);
+        palette.~QPalette();
     }
 
     emit setMapCircleBorderColor(colorDialog.currentColor());
@@ -1089,6 +1139,7 @@ void MainWindow::on_pbMapCircleColor_clicked() {
         palette.setColor(ui->wMapCircleColorDisplay->backgroundRole(),
                          colorDialog.currentColor());
         ui->wMapCircleColorDisplay->setPalette(palette);
+        palette.~QPalette();
     }
     emit setMapCircleColor(colorDialog.currentColor());
     colorDialog.close();
@@ -1097,7 +1148,6 @@ void MainWindow::on_pbMapCircleColor_clicked() {
 
 void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
 {
-    qDebug() << arg1;
     if (arg1 == 2) {
         ui->pbMapCircleBorderColor->setEnabled(true);
         ui->pbMapCircleColor->setEnabled(true);
@@ -1113,15 +1163,16 @@ void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
 
 
 void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
-    qDebug() << index.siblingAtColumn(0).data().toString();
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
     }
-    // ui->tvDatabases->indexAt(QPoint(index.row(), 0));
     QString fileName = index.siblingAtColumn(0).data().toString();
     fileNameShort = fileName.split(".")[0];
+    QString connectionName = "dbOpened";
+    QSqlDatabase::database(connectionName).close();
+    QSqlDatabase::removeDatabase(connectionName);
 
-    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "tableOpened");
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
     _db.setDatabaseName("databases/" + fileName);
     _db.open();
 
@@ -1135,15 +1186,54 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     ui->teDBTableDescription->setText(query->value(1).toString());
     ui->pbDbTableChangeDescription->setEnabled(true);
     //
+    if (ui->qwMap->source() != QUrl(nullptr)){
     ui->pbAddMap->setEnabled(true);
     ui->pbClearMap->setEnabled(true);
+    }
     // ui->cbMapType->setEnabled(true);
     ui->pbSetChart->setEnabled(true);
     ui->pbDeleteChart->setEnabled(true);
     openTable(_db);
     //emit open(_db);
-    _db.close();
-    _db.~QSqlDatabase();
-    _db.removeDatabase(_db.connectionName());
+    //_db.close();
+    //_db.~QSqlDatabase();
+    //_db.removeDatabase(_db.connectionName());
+}
+
+
+void MainWindow::on_pbChartPenColorSelection_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wChartPenColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wChartPenColorDisplay->setPalette(palette);
+        palette.~QPalette();
+    }
+    emit setChartPen(QPen(QColor(colorDialog.currentColor()),ui->sbChartPenWidth->value(),Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    colorDialog.close();
+}
+
+
+void MainWindow::on_cbChartTheme_currentIndexChanged(int index) {
+    emit setChartTheme(index);
+    if (index == 0) {
+        ui->pbChartPenColorSelection->setEnabled(true);
+        emit setChartPen(QPen(QColor(ui->wChartPenColorDisplay->palette().color(
+            ui->wChartPenColorDisplay->palette().currentColorGroup(),
+                                  ui->wChartPenColorDisplay->backgroundRole())),ui->sbChartPenWidth->value(),Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    } else{
+        ui->pbChartPenColorSelection->setEnabled(false);
+    }
+}
+
+
+void MainWindow::on_sbChartPenWidth_valueChanged(int arg1)
+{
+    emit setChartPen(QPen(QColor(ui->wChartPenColorDisplay->palette().color(
+                              ui->wChartPenColorDisplay->palette().currentColorGroup(),
+                              ui->wChartPenColorDisplay->backgroundRole())),arg1,Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
 
