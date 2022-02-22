@@ -7,12 +7,12 @@ Chart::Chart(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     setTitle("Blank chart");
     setAnimationOptions(QChart::SeriesAnimations);
     setDropShadowEnabled(false);
+
 }
 
 void Chart::clearChart() {
     if (!axes(Qt::Horizontal).isEmpty() && !axes(Qt::Vertical).isEmpty() &&
         !series().isEmpty()) {
-        qDebug() << "should clear";
         while (!axes(Qt::Horizontal).isEmpty()) {
             removeAxis(axes(Qt::Horizontal).first());
         }
@@ -44,19 +44,17 @@ void Chart::clearChart() {
     emit setPointsValue(0);
 }
 
-void Chart::setSeries() {
-    if (pen == QPen(NULL_PEN)) {
-        m_series->setPen(defaultPen);
-    } else {
-        m_series->setPen(pen);
-    }
-}
+void Chart::setChartTheme(int _theme) { setTheme(QChart::ChartTheme(_theme)); }
 void Chart::setNumberOfRows(int _numberOfRows) { numberOfRows = _numberOfRows; }
 void Chart::setDBRow(QString _row) { row = _row; }
 void Chart::setDBColumn(QString _column) { column = _column; }
+void Chart::setDBTitleRow(QString _tRow) { titleRow = _tRow; }
+void Chart::setDBTitleColumn(QString _tColumn) { titleColumn = _tColumn; }
 void Chart::setFixXChecked(bool _checked) { fixXIsChecked = _checked; }
 void Chart::setFixYChecked(bool _checked) { fixYIsChecked = _checked; }
-void Chart::setPen(QPen _pen) { pen = _pen; }
+void Chart::setPen(QPen _pen) {
+    m_series->setPen(_pen);
+}
 void Chart::drawPoint(qreal _x, qreal _y) { m_series->append(_x, _y); }
 void Chart::chartIsIndex(bool _isIndex) { isIndex = _isIndex; }
 void Chart::setTableName(QString _tableName) {
@@ -86,9 +84,7 @@ void Chart::isCoordLimit(qreal _y, qreal _yLim) {
 }
 
 void Chart::compute() {
-    qDebug() << useOptimization << useAltOptimization << aoDensity;
     clearChart();
-    setSeries();
     QSqlQuery *query = new QSqlQuery(db);
 
     int points = 0;
@@ -180,11 +176,6 @@ void Chart::compute() {
         }
     }
 
-    query->~QSqlQuery();
-    db.close();
-    db.~QSqlDatabase();
-    db.removeDatabase(db.connectionName());
-
     if (isIndex) {
         drawPoint(m_x, m_y);
     } else {
@@ -204,6 +195,7 @@ void Chart::compute() {
         m_daxisX->setRange(dxmin, dxmax);
 
         m_series->attachAxis(m_daxisX);
+        m_daxisX->setTitleText(titleRow);
     } else {
         addAxis(m_axisX, Qt::AlignBottom);
         m_axisX->setRange(xmin, xmax);
@@ -212,6 +204,7 @@ void Chart::compute() {
             m_axisX->setTickInterval(m_axisX->max() / m_axisX->tickCount());
         }
         m_series->attachAxis(m_axisX);
+        m_axisX->setTitleText(titleRow);
     }
 
     addAxis(m_axisY, Qt::AlignLeft);
@@ -222,10 +215,15 @@ void Chart::compute() {
     }
     m_axisY->setRange(ymin, ymax);
     setTitle(row + "  " + column + " chart");
+    m_axisY->setTitleText(titleColumn);
     int progress = qCeil(100 * i / numberOfRows);
     emit setDrawingProgress(progress);
     emit setPointsValue(points);
     emit setDrawingProgressDisabled();
+    query->~QSqlQuery();
+    //db.close();
+    //db.~QSqlDatabase();
+    //db.removeDatabase(db.connectionName());
 }
 
 QDateTime Chart::calculateTime(qreal _time) {

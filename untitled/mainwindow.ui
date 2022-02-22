@@ -211,13 +211,6 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="1">
-             <widget class="QLabel" name="lblMapCenterLon">
-              <property name="text">
-               <string>Долгота</string>
-              </property>
-             </widget>
-            </item>
             <item row="4" column="1">
              <widget class="QLabel" name="lblMapType">
               <property name="text">
@@ -261,13 +254,6 @@
               </property>
               <property name="wordWrap">
                <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QLabel" name="lblMapCenterLat">
-              <property name="text">
-               <string>Широта</string>
               </property>
              </widget>
             </item>
@@ -349,24 +335,10 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="2">
-             <widget class="QLabel" name="lblMapCenterLonValue">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
             <item row="3" column="1">
              <widget class="QLabel" name="lblMapType_3">
               <property name="text">
                <string>Качество</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="2">
-             <widget class="QLabel" name="lblMapZoomValue">
-              <property name="text">
-               <string>0</string>
               </property>
              </widget>
             </item>
@@ -411,13 +383,6 @@
               </property>
               <property name="text">
                <string>Отрисовано точек</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="QLabel" name="lblMapZoom">
-              <property name="text">
-               <string>Масштаб</string>
               </property>
              </widget>
             </item>
@@ -516,13 +481,6 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="2">
-             <widget class="QLabel" name="lblMapCenterLatValue">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
             <item row="6" column="3" colspan="2">
              <widget class="QDoubleSpinBox" name="sbMapCenterLonValue">
               <property name="decimals">
@@ -589,6 +547,27 @@
               </property>
              </widget>
             </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapZoom">
+              <property name="text">
+               <string>Масштаб</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCenterLon">
+              <property name="text">
+               <string>Долгота</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCenterLat">
+              <property name="text">
+               <string>Широта</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -599,46 +578,65 @@
          </attribute>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,7,0,0,0,0,0" columnstretch="130,0,1,1,2">
+           <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0" columnstretch="130,0,1,1,2">
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
             <property name="spacing">
              <number>5</number>
             </property>
-            <item row="0" column="0" rowspan="13">
-             <widget class="ChartView" name="chartView"/>
+            <item row="9" column="3" colspan="2">
+             <widget class="QComboBox" name="cbChartTheme">
+              <item>
+               <property name="text">
+                <string>Светлая</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Лазурно-голубая</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Темная</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Песочно-коричневая</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Синяя</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Высокий контраст</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Ледяная</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>QT</string>
+               </property>
+              </item>
+             </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="lblY">
+            <item row="7" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartPenColor">
               <property name="text">
-               <string>Ось Y</string>
+               <string>Цвет линии</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="4">
-             <widget class="QDoubleSpinBox" name="sbChartAODensity">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="decimals">
-               <number>0</number>
-              </property>
-              <property name="minimum">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>100000.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
+            <item row="10" column="1">
              <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -651,96 +649,19 @@
               </property>
              </spacer>
             </item>
-            <item row="3" column="1" colspan="4">
-             <widget class="QCheckBox" name="chbChartFixAxisY">
-              <property name="text">
-               <string>Зафиксировать значения оси Y</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="lblX">
-              <property name="text">
-               <string>Ось X</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1" colspan="4">
-             <widget class="QCheckBox" name="chbChartUseOptimization">
-              <property name="text">
-               <string>Использовать грубую оптимизацию</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1" colspan="4">
-             <widget class="QCheckBox" name="chbChartUseAltOptimization">
-              <property name="text">
-               <string>Использовать альтернативную оптимизацию</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="1" colspan="4">
-             <widget class="QPushButton" name="pbSetChart">
+            <item row="14" column="1" colspan="4">
+             <widget class="QPushButton" name="pbDeleteChart">
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>Создать график</string>
+               <string>Стереть график</string>
               </property>
              </widget>
             </item>
-            <item row="8" column="1" colspan="4">
-             <widget class="QLabel" name="lblChartOptimizationsWarning">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">color: rgb(170, 0, 0);</string>
-              </property>
-              <property name="text">
-               <string>Использование грубой и альтернативной видов оптимизации вместе не рекомендуется</string>
-              </property>
-              <property name="textFormat">
-               <enum>Qt::PlainText</enum>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2" colspan="3">
-             <widget class="QComboBox" name="cbChartRow">
-              <item>
-               <property name="text">
-                <string>Индекс</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>SNS</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>SND</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="12" column="1" colspan="4">
+            <item row="15" column="1" colspan="4">
              <widget class="QProgressBar" name="prbrChartDrawing">
               <property name="font">
                <font>
@@ -767,40 +688,81 @@
               </property>
              </widget>
             </item>
-            <item row="9" column="3">
-             <widget class="QLabel" name="lblChartPointsValue">
-              <property name="text">
-               <string>0</string>
+            <item row="6" column="3">
+             <widget class="QDoubleSpinBox" name="sbChartAODensity">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="minimum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100000.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
-            <item row="9" column="1" colspan="2">
-             <widget class="QLabel" name="lblChartPoints">
+            <item row="6" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartAODensity">
               <property name="text">
-               <string>Отрисовано</string>
+               <string>Отрисовывать каждую</string>
               </property>
              </widget>
             </item>
-            <item row="11" column="1" colspan="4">
-             <widget class="QPushButton" name="pbDeleteChart">
+            <item row="6" column="4">
+             <widget class="QLabel" name="lblChartAODensity_2">
+              <property name="text">
+               <string>точку</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartUseAltOptimization">
+              <property name="text">
+               <string>Ручное сокращение количества точек</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="1" colspan="4">
+             <widget class="QPushButton" name="pbSetChart">
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>Стереть график</string>
+               <string>Создать график</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1" colspan="4">
-             <widget class="QCheckBox" name="chbChartFixAxisX">
-              <property name="text">
-               <string>Зафиксировать значения оси X</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
+            <item row="0" column="2" colspan="3">
+             <widget class="QComboBox" name="cbChartRow">
+              <item>
+               <property name="text">
+                <string>Индекс</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>SNS</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>SND</string>
+               </property>
+              </item>
              </widget>
             </item>
             <item row="1" column="2" colspan="3">
@@ -873,6 +835,11 @@
               <item>
                <property name="text">
                 <string>Oy скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Oz скорость</string>
                </property>
               </item>
               <item>
@@ -1017,10 +984,123 @@
               </item>
              </widget>
             </item>
-            <item row="6" column="1" colspan="3">
-             <widget class="QLabel" name="lblMapCoordDensity_2">
+            <item row="1" column="1">
+             <widget class="QLabel" name="lblY">
               <property name="text">
-               <string>Плотность отрисовки</string>
+               <string>Ось Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartPoints">
+              <property name="text">
+               <string>Отрисовано точек</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="4">
+             <widget class="QWidget" name="wChartPenColorDisplay" native="true">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3">
+             <widget class="QPushButton" name="pbChartPenColorSelection">
+              <property name="text">
+               <string>Выбрать</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartUseOptimization">
+              <property name="text">
+               <string>Автоматическое сокращение количества точек</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="3">
+             <widget class="QLabel" name="lblChartPointsValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartFixAxisY">
+              <property name="text">
+               <string>Зафиксировать значения оси Y</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="lblX">
+              <property name="text">
+               <string>Ось X</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartTheme">
+              <property name="text">
+               <string>Тема графика</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartFixAxisX">
+              <property name="text">
+               <string>Зафиксировать значения оси X</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="16">
+             <widget class="ChartView" name="chartView"/>
+            </item>
+            <item row="11" column="1" colspan="4">
+             <widget class="QLabel" name="lblChartOptimizationsWarning">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(170, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>Использование автоматического и ручного сокращения количества точек не рекомендуется</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartPenWidth">
+              <property name="text">
+               <string>Размер линии</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="3" colspan="2">
+             <widget class="QSpinBox" name="sbChartPenWidth">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
               </property>
              </widget>
             </item>
@@ -1038,6 +1118,87 @@
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout">
+            <item row="4" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBSave">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Выбрать и сохранить файл в базу</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblSqlTableSelected">
+              <property name="text">
+               <string>Выбрано:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QPushButton" name="pbSaveFile">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Сохранить таблицу в файл</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBTableDelete">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Удалить таблицу</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QTreeView" name="tvDatabases"/>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QTextEdit" name="teDBTableDescription"/>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="lblSqlTableSelectedValue">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDbTableChangeDescription">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Изменить описание</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QLabel" name="lblDBTableDescription">
+              <property name="text">
+               <string>Описание</string>
+              </property>
+             </widget>
+            </item>
             <item row="9" column="1" colspan="2">
              <widget class="QProgressBar" name="prbrDBSave">
               <property name="font">
@@ -1065,85 +1226,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
-             <widget class="QLabel" name="lblSqlTableSelectedValue">
-              <property name="text">
-               <string>-</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1" colspan="2">
-             <widget class="QPushButton" name="pbSaveFile">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Сохранить таблицу в файл</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDbTableChangeDescription">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Изменить описание</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1" colspan="2">
-             <widget class="QTextEdit" name="teDBTableDescription"/>
-            </item>
-            <item row="4" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDBSave">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Выбрать и сохранить файл в базу</string>
-              </property>
-              <property name="checkable">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="lblSqlTableSelected">
-              <property name="text">
-               <string>Выбрано:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QLabel" name="lblDBTableDescription">
-              <property name="text">
-               <string>Описание</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDBTableDelete">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Удалить таблицу</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0" rowspan="10">
+            <item row="0" column="0" rowspan="11">
              <widget class="QTableView" name="tvSqlTable">
               <property name="font">
                <font>
@@ -1152,8 +1235,24 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QTreeView" name="tvDatabases"/>
+            <item row="10" column="1" colspan="2">
+             <widget class="QLabel" name="lblDBErrorWarning">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <family>Century Gothic</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>Ошибка записи файла в базу</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
