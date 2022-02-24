@@ -34,7 +34,7 @@
          <number>5</number>
         </property>
         <property name="rightMargin">
-         <number>140</number>
+         <number>100</number>
         </property>
         <item>
          <spacer name="horizontalSpacer">
@@ -50,14 +50,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="lblMapSelectedTable">
+         <widget class="QLabel" name="lblSelectedDB">
           <property name="text">
-           <string>Данные взяты из таблицы -</string>
+           <string>Данные взяты из базы -</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lblMapSelectedTableValue">
+         <widget class="QLabel" name="lblSelectedDBValue">
           <property name="text">
            <string>-</string>
           </property>
@@ -636,19 +636,6 @@
               </property>
              </widget>
             </item>
-            <item row="10" column="1">
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
             <item row="14" column="1" colspan="4">
              <widget class="QPushButton" name="pbDeleteChart">
               <property name="font">
@@ -1022,13 +1009,6 @@
               </property>
              </widget>
             </item>
-            <item row="12" column="3">
-             <widget class="QLabel" name="lblChartPointsValue">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
             <item row="3" column="1" colspan="4">
              <widget class="QCheckBox" name="chbChartFixAxisY">
               <property name="text">
@@ -1071,10 +1051,13 @@
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
+                <italic>false</italic>
+                <bold>false</bold>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">color: rgb(170, 0, 0);</string>
+               <string notr="true">color: rgb(170, 0, 0);
+font: 10pt &quot;Century Gothic&quot;;</string>
               </property>
               <property name="text">
                <string>Использование автоматического и ручного сокращения количества точек не рекомендуется</string>
@@ -1101,6 +1084,26 @@
               </property>
               <property name="maximum">
                <number>20</number>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="4">
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="12" column="3" colspan="2">
+             <widget class="QLabel" name="lblChartPointsValue">
+              <property name="text">
+               <string>0</string>
               </property>
              </widget>
             </item>
@@ -1134,7 +1137,7 @@
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QLabel" name="lblSqlTableSelected">
+             <widget class="QLabel" name="lblSqlSelected">
               <property name="text">
                <string>Выбрано:</string>
               </property>
@@ -1164,14 +1167,11 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QTreeView" name="tvDatabases"/>
-            </item>
             <item row="7" column="1" colspan="2">
              <widget class="QTextEdit" name="teDBTableDescription"/>
             </item>
             <item row="2" column="2">
-             <widget class="QLabel" name="lblSqlTableSelectedValue">
+             <widget class="QLabel" name="lblSqlDBSelectedValue">
               <property name="text">
                <string>-</string>
               </property>
@@ -1189,13 +1189,6 @@
               </property>
               <property name="text">
                <string>Изменить описание</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QLabel" name="lblDBTableDescription">
-              <property name="text">
-               <string>Описание</string>
               </property>
              </widget>
             </item>
@@ -1242,7 +1235,6 @@
               </property>
               <property name="font">
                <font>
-                <family>Century Gothic</family>
                 <pointsize>10</pointsize>
                </font>
               </property>
@@ -1250,7 +1242,17 @@
                <string notr="true">color: rgb(255, 0, 0);</string>
               </property>
               <property name="text">
-               <string>Ошибка записи файла в базу</string>
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" rowspan="2" colspan="2">
+             <widget class="QTreeView" name="tvDatabases"/>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QLabel" name="lblDBTableDescription">
+              <property name="text">
+               <string>Описание</string>
               </property>
              </widget>
             </item>

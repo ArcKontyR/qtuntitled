@@ -214,7 +214,9 @@ void Chart::compute() {
         m_axisY->setTickInterval(m_axisY->max() / m_axisY->tickCount());
     }
     m_axisY->setRange(ymin, ymax);
-    setTitle(row + "  " + column + " chart");
+    QString chartTitle = "График отношения параметров: '%1' и '%2'";
+    chartTitle = chartTitle.arg(titleRow).arg(titleColumn);
+    setTitle(chartTitle);
     m_axisY->setTitleText(titleColumn);
     int progress = qCeil(100 * i / numberOfRows);
     emit setDrawingProgress(progress);

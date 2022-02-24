@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "chart.h"
 #include "filedialog.h"
+#include "statisticswindow.h"
 #include <QtSql>
 #include <QtCharts/QChart>
 #include <QQmlApplicationEngine>
@@ -403,6 +404,17 @@ int MainWindow::countInsertQueryRows(QFile *file) {
                 tmpData.priority >> tmpData.gps_glo >> tmpData.sns_mode >>
                 tmpData.sns_cmd >> tmpData.pni_bits >> tmpData.fix_bits >>
                 tmpData.recv_status;
+            if (!loadedFileCorrupted &&
+                (tmpData.recv_status != 0 || tmpData.priority != 0)) {
+                QString text = "Ошибка записи файла в базу. Записано %1% "
+                               "файла";
+                text = text.arg(QString::number(
+                    static_cast<double>(100 * sizeof(tmpData) * static_cast<double>(rows)) /
+                        static_cast<double>(file->size()),'f',4));
+                ui->lblDBErrorWarning->setText(text);
+                emit dbErrorAppeared();
+                return rows;
+            }
             ++rows;
         }
     }
@@ -417,11 +429,10 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
         _fileName.split("/")[fileName.split("/").size() - 1];
     int currentRow = 0;
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBSaving");
-    _db.setDatabaseName(QDir::currentPath() + "/databases/" + _fileNameShort + ".sqlite");
+    _db.setDatabaseName("databases/" + _fileNameShort + ".sqlite");
     _db.open();
     QSqlQuery *query = new QSqlQuery(_db);
     QString strSelect = "SELECT * FROM DataTable";
-
     QSqlQuery *secquery = new QSqlQuery(db);
     secquery->exec(strMainTableCreate);
     QString strAddTable = "INSERT INTO MainTable VALUES('%1','%2','%3');";
@@ -478,9 +489,7 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                         "recv_status UINT32_T"
                         ");";
 
-    ui->prbrDBSave->setValue(5);
-    if (!query->exec(strCreate)) {
-    } else {
+    if (query->exec(strCreate)) {
         secquery->exec(strAddTable);
         if (file->open(QIODevice::ReadOnly)) {
             QDataStream stream(file);
@@ -508,23 +517,10 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                     tmpData.fix_bits >> tmpData.recv_status;
                 ++currentRow;
 
-                int progress = qCeil(100 * currentRow / _numberOfRows);
-                emit setDBProgress(progress);
-                if (tmpData.recv_status != 0) {
-                    qDebug() << "loading error";
-                    emit dbErrorAppeared();
-                    emit setDBProgressDisabled();
-                    tmpData.~BpiData();
-                    file->close();
-                    stream.~QDataStream();
-                    file->~QFile();
-                    _db.commit();
-                    query->~QSqlQuery();
-                    _db.close();
-                    _db.~QSqlDatabase();
-                    _db.removeDatabase(_db.connectionName());
-                    return;
-                }
+                double progress =
+                    static_cast<double>(100 * currentRow) / static_cast<double>(_numberOfRows);
+                emit setDBProgress(qCeil(progress));
+
                 if (tmpData.pni_bits != 0) {
                     QString strInsert =
                         "INSERT INTO DataTable (nNavCounter, sns_utc, snd_utc, "
@@ -598,14 +594,17 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
                         qDebug() << "Unable to make insert operation"
                                  << query->lastError() << strInsert;
                     }
+                    if (currentRow == _numberOfRows) {
+                        break;
+                    }
                 }
                 tmpData.~BpiData();
             }
             file->close();
             stream.~QDataStream();
             file->~QFile();
+            _db.commit();
         }
-        _db.commit();
     }
     query->~QSqlQuery();
     _db.close();
@@ -613,12 +612,13 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     _db.removeDatabase(_db.connectionName());
 
     emit setDBProgressDisabled();
+    ui->tvDatabases->setEnabled(true);
 }
 
 void MainWindow::dbError() {
     ui->lblDBErrorWarning->setVisible(true);
     loadedFileCorrupted = true;
-    QTimer::singleShot(2000, this, SLOT(dbErrorClear()));
+    QTimer::singleShot(3000, this, SLOT(dbErrorClear()));
 }
 
 void MainWindow::dbErrorClear() {
@@ -626,6 +626,7 @@ void MainWindow::dbErrorClear() {
 }
 
 void MainWindow::on_pbDBSave_clicked() {
+    dbErrorClear();
     FileDialog *dialog = new FileDialog();
     dialog->show();
     dialog->exec();
@@ -643,33 +644,29 @@ void MainWindow::on_pbDBSave_clicked() {
     fileNameShort = fileName.split("/")[fileName.split("/").size() - 1];
     dialog->close();
 
-    int numberOfRows =
-        QtConcurrent::run(this, &MainWindow::countInsertQueryRows, file)
-            .result();
+    int numberOfRows  =  QtConcurrent::run(this, &MainWindow::countInsertQueryRows, file).result();
+
+    qDebug() << numberOfRows;
     file->close();
     file->~QFile();
+
     ui->tvDatabases->setEnabled(false);
-    QFuture<void> future =
-    QtConcurrent::run(this, &MainWindow::saveDB,numberOfRows,fileName,description);
-    future.waitForFinished();
-    if (future.isFinished()) {
-        ui->tvDatabases->setEnabled(true);
-        if (loadedFileCorrupted) {
-            on_pbDBTableDelete_clicked();
-            loadedFileCorrupted = false;
-        }
-    }
-    future.~QFuture();
+    QFuture<void> future = QtConcurrent::run(
+        this, &MainWindow::saveDB, numberOfRows, fileName, description);
+    StatisticsWindow *statsWindow = new StatisticsWindow();
+    statsWindow->setFileName(fileNameShort);
+    //statsWindow->setFileRowCount(numberOfRows);
+    //statsWindow->setFileCorruption(loadedFileCorrupted);
+    statsWindow->show();
+    loadedFileCorrupted = false;
 }
 
 void MainWindow::openTable(QSqlDatabase _db) {
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
     }
-
     QSqlQuery *query = new QSqlQuery(_db);
     QString strSelect = "SELECT * FROM DataTable";
-
     QSqlQueryModel *sqlModel = new QSqlQueryModel;
 
     if (query->exec(strSelect)) {
@@ -683,6 +680,8 @@ void MainWindow::on_pbSetChart_clicked() {
     if (fileNameShort.isEmpty()) {
         return;
     }
+    QSqlDatabase::database("chartConnection").close();
+    QSqlDatabase::removeDatabase("chartConnection");
     Chart *chart = new Chart();
     connect(this, SIGNAL(drawChart()), chart, SLOT(compute()));
     connect(this, SIGNAL(setChartTableName(QString)), chart,
@@ -737,10 +736,6 @@ void MainWindow::on_pbSetChart_clicked() {
     emit setChartDBTitleColumn(structListTitlesY.at(ui->cbChartColumn->currentIndex()));
     emit setChartUseOptimization(ui->chbChartUseOptimization->isChecked());
     emit setChartUseAltOptimization(ui->chbChartUseAltOptimization->isChecked());
-    qDebug() << structListTitlesX.at(ui->cbChartRow->currentIndex())
-             << ui->cbChartRow->currentText();
-    qDebug() << structListTitlesY.at(ui->cbChartColumn->currentIndex())
-             << ui->cbChartColumn->currentText();
     emit setChartAODensity(qCeil(ui->sbChartAODensity->value()));
     emit setChartTheme(ui->cbChartTheme->currentIndex());
     emit drawChart();
@@ -763,8 +758,6 @@ void MainWindow::on_pbSetChart_clicked() {
             SLOT(onChartPointsValueChanged(int)));
     connect(this, SIGNAL(setChartTheme(int)), chart, SLOT(setChartTheme(int)));
     connect(this, SIGNAL(setChartPen(QPen)), chart, SLOT(setPen(QPen)));
-    QSqlDatabase::database("chartConnection").close();
-    QSqlDatabase::removeDatabase("chartConnection");
 }
 
 void MainWindow::onChartDrawingProgressChanged(int progress) {
@@ -917,7 +910,7 @@ void MainWindow::on_pbDBTableDelete_clicked() {
     QString connectionName = "dbOpened";
     QSqlDatabase::database(connectionName).close();
     QSqlDatabase::removeDatabase(connectionName);
-    QFile::remove(QDir::currentPath() + "/databases/" + fileNameShort +
+    QFile::remove("databases/" + fileNameShort +
                   ".sqlite");
     QSqlQuery *query = new QSqlQuery(db);
     QString strDeleteTable = "DELETE FROM MainTable WHERE name = '%1'";
@@ -925,8 +918,8 @@ void MainWindow::on_pbDBTableDelete_clicked() {
     query->exec(strDeleteTable);
     query->~QSqlQuery();
     fileNameShort = "";
-    ui->lblSqlTableSelectedValue->setText("");
-    ui->lblMapSelectedTableValue->setText("");
+    ui->lblSqlDBSelectedValue->setText("");
+    ui->lblSelectedDBValue->setText("");
     ui->teDBTableDescription->setText("");
     ui->pbDbTableChangeDescription->setEnabled(false);
 
@@ -1001,6 +994,7 @@ void MainWindow::on_chbChartUseAltOptimization_stateChanged(int arg1) {
 
 void MainWindow::on_chbChartUseOptimization_stateChanged(int arg1)
 {
+    Q_UNUSED(arg1)
     if (ui->chbChartUseAltOptimization->isChecked() &&
         ui->chbChartUseOptimization->isChecked()) {
         ui->lblChartOptimizationsWarning->setVisible(true);
@@ -1181,8 +1175,8 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     QSqlQuery *query = new QSqlQuery(db);
     query->exec(strSelect);
     query->first();
-    ui->lblSqlTableSelectedValue->setText(fileNameShort);
-    ui->lblMapSelectedTableValue->setText(fileNameShort);
+    ui->lblSqlDBSelectedValue->setText(fileNameShort);
+    ui->lblSelectedDBValue->setText(fileNameShort);
     ui->teDBTableDescription->setText(query->value(1).toString());
     ui->pbDbTableChangeDescription->setEnabled(true);
     //

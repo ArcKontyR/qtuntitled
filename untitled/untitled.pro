@@ -15,16 +15,19 @@ SOURCES += \
     chartview.cpp \
     filedialog.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    statisticswindow.cpp
 
 HEADERS += \
     chart.h \
     chartview.h \
     filedialog.h \
-    mainwindow.h
+    mainwindow.h \
+    statisticswindow.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    statisticswindow.ui
 DISTFILES +=
 
 RESOURCES += \
