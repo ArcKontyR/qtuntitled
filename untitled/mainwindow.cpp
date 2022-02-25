@@ -228,6 +228,7 @@ void MainWindow::connectSignals() {
             SLOT(onDBProgressBarVisibilityChanged()));
 
     connect(this, SIGNAL(open(QSqlDatabase)), this, SLOT(openTable(QSqlDatabase)));
+    connect(this, SIGNAL(openStatsWindow(bool)), this, SLOT(startStatsWindow(bool)));
 
 }
 MainWindow::~MainWindow()
@@ -612,7 +613,31 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     _db.removeDatabase(_db.connectionName());
 
     emit setDBProgressDisabled();
+    emit openStatsWindow(true);
     ui->tvDatabases->setEnabled(true);
+}
+
+void MainWindow::startStatsWindow(bool _isSet) {
+    StatisticsWindow *statsWindow = new StatisticsWindow();
+    statsWindow->setFileName(fileNameShort);
+    statsWindow->setFilePath(fileName);
+    statsWindow->setFileRowCount(numberOfRows);
+    statsWindow->setFileCorruption(loadedFileCorrupted);
+    if (_isSet) {
+        connect(this, SIGNAL(setStatsWindow()), statsWindow, SLOT(setStats()));
+        emit setStatsWindow();
+    } else {
+        connect(this, SIGNAL(getStatsWindow()), statsWindow, SLOT(getStats()));
+        emit getStatsWindow();
+    }
+    statsWindow->show();
+}
+
+void MainWindow::on_pbStartStatsWindow_clicked() {
+    if (fileNameShort == "") {
+        return;
+    }
+    emit openStatsWindow(false);
 }
 
 void MainWindow::dbError() {
@@ -644,20 +669,17 @@ void MainWindow::on_pbDBSave_clicked() {
     fileNameShort = fileName.split("/")[fileName.split("/").size() - 1];
     dialog->close();
 
-    int numberOfRows  =  QtConcurrent::run(this, &MainWindow::countInsertQueryRows, file).result();
+    numberOfRows  =  QtConcurrent::run(this, &MainWindow::countInsertQueryRows, file).result();
 
-    qDebug() << numberOfRows;
     file->close();
     file->~QFile();
 
     ui->tvDatabases->setEnabled(false);
+
     QFuture<void> future = QtConcurrent::run(
         this, &MainWindow::saveDB, numberOfRows, fileName, description);
-    StatisticsWindow *statsWindow = new StatisticsWindow();
-    statsWindow->setFileName(fileNameShort);
-    //statsWindow->setFileRowCount(numberOfRows);
-    //statsWindow->setFileCorruption(loadedFileCorrupted);
-    statsWindow->show();
+
+
     loadedFileCorrupted = false;
 }
 
@@ -1230,4 +1252,7 @@ void MainWindow::on_sbChartPenWidth_valueChanged(int arg1)
                               ui->wChartPenColorDisplay->palette().currentColorGroup(),
                               ui->wChartPenColorDisplay->backgroundRole())),arg1,Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
+
+
+
 

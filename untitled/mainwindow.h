@@ -81,6 +81,7 @@ private:
     //QQuickWidget* m_quickWidget;
     QString fileName;
     QString fileNameShort;
+    int numberOfRows;
     QList<QString> chartTitles;
     QList<QString> chartViewTitles;
     const QString strTableQuery = "SELECT name FROM sqlite_master WHERE type = 'table'";
@@ -111,6 +112,8 @@ private:
     QString strSelect;
     bool fixAxisXWasChecked;
     bool loadedFileCorrupted = false;
+
+
 
     void connectSignals();
 
@@ -154,6 +157,8 @@ public slots:
     void onDBProgressChanged(int progress);
     void onDBProgressBarVisibilityChanged();
     void on_cbChartRow_currentIndexChanged(int index);
+
+    void startStatsWindow(bool);
 
 signals:
     void setMapPlugin(QString plugin);
@@ -200,6 +205,10 @@ signals:
     void dbErrorAppeared();
     void setDBProgress(int);
     void setDBProgressDisabled();
+
+    void openStatsWindow(bool);
+    void setStatsWindow();
+    void getStatsWindow();
 private slots:
 
     void on_sbChartAODensity_valueChanged(double arg1);
@@ -221,6 +230,7 @@ private slots:
     void on_pbChartPenColorSelection_clicked();
     void on_cbChartTheme_currentIndexChanged(int index);
     void on_sbChartPenWidth_valueChanged(int arg1);
+    void on_pbStartStatsWindow_clicked();
 };
 
 #endif // MAINWINDOW_H
