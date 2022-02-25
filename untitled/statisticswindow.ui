@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QDialogButtonBox" name="bbConfirm">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -29,7 +29,7 @@
     <set>QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QTreeWidget" name="treeWidget">
+  <widget class="QTreeWidget" name="twStatistics">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -48,7 +48,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>bbConfirm</sender>
    <signal>accepted()</signal>
    <receiver>StatisticsWindow</receiver>
    <slot>accept()</slot>
@@ -64,7 +64,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>bbConfirm</sender>
    <signal>rejected()</signal>
    <receiver>StatisticsWindow</receiver>
    <slot>reject()</slot>

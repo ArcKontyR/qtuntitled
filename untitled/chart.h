@@ -16,6 +16,7 @@ public:
     Chart(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
     // void setSqlQueryString(QString query);
 
+
 public slots:
     void setDatabase(QSqlDatabase);
     void setPen(QPen);
@@ -35,6 +36,8 @@ public slots:
     void setUseAltOptimization(bool);
     void setAODensity(int);
     void setChartTheme(int);
+
+    QDateTime calculateTime(qreal);
 private:
     QSqlDatabase db;
     QString tableName;
@@ -79,7 +82,6 @@ signals:
     void setDrawingProgressDisabled();
 
 private slots:
-    QDateTime calculateTime(qreal);
     void isCoordLimit(qreal _y, qreal _yLim);
 };
 

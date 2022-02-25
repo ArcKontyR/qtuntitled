@@ -1,6 +1,5 @@
 #ifndef STATISTICSWINDOW_H
 #define STATISTICSWINDOW_H
-
 #include <QtGui>
 #include <QtWidgets>
 
@@ -21,16 +20,19 @@ protected:
 
 public slots:
     void setFileName(QString);
-    //void setFileRowCount(int);
-    //void setFileCorruption(bool);
+    void setFilePath(QString);
+    void setFileRowCount(int);
+    void setFileCorruption(bool);
+    void setStats();
+    void getStats();
+
 private slots:
-    void on_buttonBox_clicked(QAbstractButton *button);
-
-
 private:
     Ui::StatisticsWindow *ui;
-
     QString fileName;
+    QString filePath;
+    int rowCount;
+    bool isCorrupted;
 };
 
 #endif // STATISTICSWINDOW_H
