@@ -223,9 +223,6 @@ void Chart::compute() {
     emit setPointsValue(points);
     emit setDrawingProgressDisabled();
     query->~QSqlQuery();
-    //db.close();
-    //db.~QSqlDatabase();
-    //db.removeDatabase(db.connectionName());
 }
 
 QDateTime Chart::calculateTime(qreal _time) {

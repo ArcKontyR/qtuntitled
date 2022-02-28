@@ -10,7 +10,9 @@ StatisticsWindow::StatisticsWindow(QWidget *parent) :
                                                       ui(new Ui::StatisticsWindow)
 {
     ui->setupUi(this);
-
+    setFont(QFont("Century Gothic",10));
+    ui->lblErrorValue->setVisible(false);
+    ui->lblError->setVisible(false);
 }
 
 StatisticsWindow::~StatisticsWindow()
@@ -43,7 +45,7 @@ void StatisticsWindow::getStats() {
         QSqlDatabase::addDatabase("QSQLITE", "getStatisticsConnection");
     db.setDatabaseName("databases/" + fileName + ".sqlite");
     db.open();
-    qDebug() << db.databaseName();
+    ui->lblFileNameValue->setText(fileName);
     QString selectStatTable = "SELECT * FROM StatisticsTable";
     QString selectGeneralTable = "SELECT * FROM StatisticsGeneralTable";
     QString selectErrorTable = "SELECT * FROM StatisticsErrorTable";
@@ -59,10 +61,8 @@ void StatisticsWindow::getStats() {
     QSqlQuery *generalQuery = new QSqlQuery(db);
     generalQuery->exec(selectGeneralTable);
     while (generalQuery->next()) {
-        QTreeWidgetItem *generalChildItem =
-            new QTreeWidgetItem(generalParentItem);
-        generalChildItem->setText(0, generalQuery->value(0).toString());
-        generalChildItem->setText(1, generalQuery->value(1).toString());
+        setTreeWidgetItem(generalParentItem, generalQuery->value(0).toString(),
+                          generalQuery->value(1).toString());
     }
     int errorId = 0;
     statQuery->next();
@@ -74,14 +74,38 @@ void StatisticsWindow::getStats() {
         ++errorId;
         QTreeWidgetItem *errors1GenChildItem =
             new QTreeWidgetItem(errorsParentItem);
-        errors1GenChildItem->setText(0, generalQuery->value(1).toString());
-        errors1GenChildItem->setText(1, generalQuery->value(2).toString());
+        errors1GenChildItem->setText(0, errorsQuery->value(1).toString());
+        errors1GenChildItem->setText(1, errorsQuery->value(2).toString());
+
+        if (errorsQuery->value(1).toString() == "Файл поврежден") {
+            ui->lblStatusValue->setText("Ошибка записи");
+            ui->lblStatusValue->setStyleSheet(
+                "color: red; font: 10pt \"Century Gothic\";");
+            ui->lblErrorValue->setText(errorsQuery->value(1).toString());
+            ui->lblErrorValue->setStyleSheet(
+                "color: red; font: 10pt \"Century Gothic\";");
+            ui->lblError->setVisible(true);
+            ui->lblErrorValue->setVisible(true);
+        } else{
+            ui->lblStatusValue->setText("Успешно");
+            ui->lblStatusValue->setStyleSheet(
+                "color: green; font: 10pt \"Century Gothic\";");
+        }
+
         QString selectErrorValuesTable =
             "SELECT * FROM StatisticsErrorValuesTable WHERE errorId == %1";
+        selectErrorValuesTable = selectErrorValuesTable.arg(errorId);
         QSqlQuery *errors2GenQuery = new QSqlQuery(db);
-
+        errors2GenQuery->exec(selectErrorValuesTable);
+        while (errors2GenQuery->next()) {
+            setTreeWidgetItem(errors1GenChildItem, errors2GenQuery->value(1).toString(),
+                              errors2GenQuery->value(2).toString());
+        }
+        errors2GenQuery->~QSqlQuery();
     }
-
+    errorsQuery->~QSqlQuery();
+    generalQuery->~QSqlQuery();
+    statQuery->~QSqlQuery();
 }
 
 void StatisticsWindow::setStats() {
@@ -90,8 +114,7 @@ void StatisticsWindow::setStats() {
         QSqlDatabase::addDatabase("QSQLITE", "setStatisticsConnection");
     db.setDatabaseName("databases/" + fileName + ".sqlite");
     db.open();
-    qDebug() << db.databaseName();
-
+    ui->lblFileNameValue->setText(fileName);
     QSqlQuery *mainQuery = new QSqlQuery(db);
     QString createStatTable =
         "CREATE TABLE StatisticsTable(statName TEXT, statValue TEXT);";
@@ -114,6 +137,15 @@ void StatisticsWindow::setStats() {
         "INTEGER,errorValueName TEXT, "
         "errorValueInfo "
         "TEXT);";
+    QString insertErrorTableParameters =
+        "INSERT INTO StatisticsErrorTable(errorId, errorName, "
+        "errorInfo) "
+        "VALUES(%1,'%2','%3');";
+    QString insertErrorValuesTableParameters =
+        "INSERT INTO StatisticsErrorValuesTable(errorId, "
+        "errorValueName, "
+        "errorValueInfo) "
+        "VALUES(%1,'%2','%3');";
     mainQuery->exec(createStatTable);
     mainQuery->exec(insertStatTableDefaultParameter1);
     mainQuery->exec(insertStatTableDefaultParameter2);
@@ -136,11 +168,18 @@ void StatisticsWindow::setStats() {
     generalParentItem->setText(0, "Общее");
     QTreeWidgetItem *warningsParentItem = new QTreeWidgetItem(ui->twStatistics);
     warningsParentItem->setText(0, "Ошибки");
+
     int rows = 0;
+    int firstEmptyRow = 0;
+    int emptyRows = 0;
+    int firstEmptySNSRow = 0;
+    int emptySNSs = 0;
     QTime flightStarted;
     QTime flightFinished;
     bool isFlightStarted = false;
     int errorId = 0;
+    qreal maxAltitude = 0;
+    qreal minAltitude = 0;
 
     while (stream.atEnd() == false && stream.status() == QDataStream::Ok) {
         ++rows;
@@ -172,76 +211,245 @@ void StatisticsWindow::setStats() {
                 flightFinished = QTime::fromString(
                     QString::number(tmpData.sns_utc), "hmmsszzz");
             }
+            /*--Подсчет временных пропусков--*/
+            if (tmpData.sns_utc == 0) {
+                ++emptySNSs;
+                if (firstEmptySNSRow == 0) {
+                    firstEmptySNSRow = rows;
+                }
+            }
 
-            if ((tmpData.nNavCounter - prevData.nNavCounter) > 1 /*&&
-                prevData.nNavCounter < tmpData.nNavCounter && isFlightStarted*/) {
+            /*--Установка значений высоты--*/
+            if (qFuzzyCompare(minAltitude, 0) && !qFuzzyCompare(tmpData.h, 0)) {
+                minAltitude = tmpData.h;
+            }
+            maxAltitude = qMax(maxAltitude, tmpData.h);
+            minAltitude = qMin(minAltitude, tmpData.h);
+            /*--Проверка на пропуски--*/
+            if ((tmpData.nNavCounter - prevData.nNavCounter) > 1 &&
+                prevData.nNavCounter < tmpData.nNavCounter && isFlightStarted) {
                 ++errorId;
-                QString insertErrorTableParameters =
-                    "INSERT INTO StatisticsErrorTable(errorId, errorName, "
-                    "errorInfo) "
-                    "VALUES(%1,'%2','%3');";
-                QString insertErrorValuesTableParameters =
-                    "INSERT INTO StatisticsErrorValuesTable(errorId, "
-                    "errorValueName, "
-                    "errorValueInfo) "
-                    "VALUES(%1,'%2','%3');";
-                //                QString insertErrorValuesTableParameter2 =
-                //                    "INSERT INTO
-                //                    StatisticsErrorValuesTable(errorId, "
-                //                    "errorValueName, "
-                //                    "errorValueInfo) "
-                //                    "VALUES(%1,'%2','%3');";
+
                 QTreeWidgetItem *childItem =
                     new QTreeWidgetItem(warningsParentItem);
                 childItem->setText(0, "Пропуск");
-                insertErrorTableParameters =
+                setItemToDatabase(
+                    mainQuery,
                     insertErrorTableParameters.arg(errorId).arg("Пропуск").arg(
-                        "");
-                mainQuery->exec(insertErrorTableParameters);
-                QTreeWidgetItem *first2GenChildItem =
-                    new QTreeWidgetItem(childItem);
-                first2GenChildItem->setText(0, "Начало");
-                first2GenChildItem->setText(
-                    1, QString::number(prevData.nNavCounter));
-
-                QString insertErrorValuesTableParameter1 =
+                        ""));
+                setTreeWidgetItem(childItem, "Номер записи начала",
+                                  QString::number(rows - 1));
+                setItemToDatabase(mainQuery,
+                                  insertErrorValuesTableParameters.arg(errorId)
+                                      .arg("Номер записи начала")
+                                      .arg(QString::number(rows - 1)));
+                setTreeWidgetItem(childItem, "Начало",
+                                  QString::number(prevData.nNavCounter));
+                setItemToDatabase(
+                    mainQuery,
                     insertErrorValuesTableParameters.arg(errorId)
                         .arg("Начало")
-                        .arg(QString::number(prevData.nNavCounter));
-                mainQuery->exec(insertErrorValuesTableParameter1);
+                        .arg(QString::number(prevData.nNavCounter)));
 
-                QTreeWidgetItem *sec2GenChildItem =
-                    new QTreeWidgetItem(childItem);
-                sec2GenChildItem->setText(0, "Конец");
-                sec2GenChildItem->setText(1,
-                                          QString::number(tmpData.nNavCounter));
-
-                QString insertErrorValuesTableParameter2 =
+                setTreeWidgetItem(childItem, "Конец",
+                                  QString::number(tmpData.nNavCounter));
+                setItemToDatabase(
+                    mainQuery,
                     insertErrorValuesTableParameters.arg(errorId)
                         .arg("Конец")
-                        .arg(QString::number(tmpData.nNavCounter));
-                mainQuery->exec(insertErrorValuesTableParameter2);
+                        .arg(QString::number(tmpData.nNavCounter)));
             }
-            if (rows == rowCount && isCorrupted) {
+            /*--Остановка цикла при поврежденном файле--*/
+            if (rows == rowCount) {
                 break;
             }
+        } else {
+            /*--Подсчет пустых записей--*/
+            if (firstEmptyRow == 0) {
+                firstEmptyRow = rows;
+            }
+            ++emptyRows;
         }
     }
+    /*--Проверка на поврежденность--*/
+    if (isCorrupted) {
+        ++errorId;
+        QTreeWidgetItem *childItem = new QTreeWidgetItem(warningsParentItem);
+        childItem->setText(0, "Файл поврежден");
+        setItemToDatabase(mainQuery,
+                          insertErrorTableParameters.arg(errorId)
+                              .arg("Файл поврежден")
+                              .arg(""));
+        setTreeWidgetItem(
+            childItem, "Записано байт",
+            QString::number(sizeof(tmpData) *
+                            static_cast<unsigned long long>(rowCount)));
+        setItemToDatabase(mainQuery,
+                          insertErrorValuesTableParameters.arg(errorId)
+                              .arg("Записано байт")
+                              .arg(QString::number(
+                                  sizeof(tmpData) *
+                                  static_cast<unsigned long long>(rowCount))));
+        setTreeWidgetItem(
+            childItem, "Записано байт (%)",
+            QString::number(static_cast<double>(100 * sizeof(tmpData) *
+                                                static_cast<double>(rows)) /
+                                static_cast<double>(file->size()),
+                            'f', 4));
+        setItemToDatabase(
+            mainQuery,
+            insertErrorValuesTableParameters.arg(errorId)
+                .arg("Записано байт (%)")
+                .arg(QString::number(
+                    static_cast<double>(100 * sizeof(tmpData) *
+                                        static_cast<double>(rows)) /
+                        static_cast<double>(file->size()),
+                    'f', 4)));
+        setTreeWidgetItem(childItem, "Всего байт",
+                          QString::number(file->size()));
+        setItemToDatabase(mainQuery,
+                          insertErrorValuesTableParameters.arg(errorId)
+                              .arg("Всего байт")
+                              .arg(QString::number(file->size())));
 
-    QTime defaultTime = QTime(0, 0, 0);
+        ui->lblStatusValue->setText("Ошибка записи");
+        ui->lblStatusValue->setStyleSheet(
+            "color: red; font: 10pt \"Century Gothic\";");
+        ui->lblErrorValue->setText("Файл поврежден");
+        ui->lblErrorValue->setStyleSheet(
+            "color: red; font: 10pt \"Century Gothic\";");
+        ui->lblError->setVisible(true);
+        ui->lblErrorValue->setVisible(true);
+
+    } else {
+        ui->lblStatusValue->setText("Успешно");
+        ui->lblStatusValue->setStyleSheet(
+            "color: green; font: 10pt \"Century Gothic\";");
+    }
+    /*--Проверка на пустые записи--*/
+    if (firstEmptyRow != 0) {
+        ++errorId;
+        QTreeWidgetItem *childItem =
+            new QTreeWidgetItem(warningsParentItem);
+        childItem->setText(0, "Пустые записи");
+        setItemToDatabase(
+            mainQuery,
+            insertErrorTableParameters.arg(errorId).arg("Пустые записи").arg(
+                ""));
+        setTreeWidgetItem(childItem, "Номер первой записи",
+                          QString::number(firstEmptyRow));
+        setItemToDatabase(
+            mainQuery,
+            insertErrorValuesTableParameters.arg(errorId)
+                .arg("Номер первой записи")
+                .arg(QString::number(firstEmptyRow)));
+
+        setTreeWidgetItem(childItem, "Количество",
+                          QString::number(emptyRows));
+        setItemToDatabase(
+            mainQuery,
+            insertErrorValuesTableParameters.arg(errorId)
+                .arg("Количество")
+                .arg(QString::number(emptyRows)));
+    }
+    /*--Проверка на наличие SNS--*/
+    if (firstEmptySNSRow != 0) {
+        ++errorId;
+        QTreeWidgetItem *childItem =
+            new QTreeWidgetItem(warningsParentItem);
+        childItem->setText(0, "Отсутствует SNS время");
+        setItemToDatabase(
+            mainQuery,
+            insertErrorTableParameters.arg(errorId).arg("Отсутствует SNS время").arg(
+                ""));
+        setTreeWidgetItem(childItem, "Номер первой записи",
+                          QString::number(firstEmptySNSRow));
+        setItemToDatabase(
+            mainQuery,
+            insertErrorValuesTableParameters.arg(errorId)
+                .arg("Номер первой записи")
+                .arg(QString::number(firstEmptySNSRow)));
+
+        setTreeWidgetItem(childItem, "Количество",
+                          QString::number(emptySNSs));
+        setItemToDatabase(
+            mainQuery,
+            insertErrorValuesTableParameters.arg(errorId)
+                .arg("Количество")
+                .arg(QString::number(emptySNSs)));
+    }
+
     QTime flightTime;
-    flightTime = defaultTime.addSecs(flightStarted.secsTo(flightFinished));
-    QTreeWidgetItem *childItem = new QTreeWidgetItem(generalParentItem);
-    childItem->setText(0, "Время в полете");
-    childItem->setText(1, flightTime.toString());
-    QString insertGeneralTableParameter =
-        insertGeneralTableParameters.arg("Время в полете")
-            .arg(flightTime.toString());
-    mainQuery->exec(insertGeneralTableParameter);
-    db.close();
-    db.removeDatabase(db.connectionName());
+    flightTime = QTime(0, 0, 0).addSecs(flightStarted.secsTo(flightFinished));
+    setTreeWidgetItem(generalParentItem, "Время в полете",
+                      flightTime.toString());
+    setItemToDatabase(mainQuery,
+                      insertGeneralTableParameters.arg("Время в полете")
+                          .arg(flightTime.toString()));
+    setTreeWidgetItem(generalParentItem, "Максимальная высота от земли, м",
+                      QString::number(maxAltitude - minAltitude, 'f', 3));
+    setItemToDatabase(
+        mainQuery,
+        insertGeneralTableParameters.arg("Максимальная высота от земли, м")
+            .arg(QString::number(maxAltitude - minAltitude, 'f', 3)));
+    setTreeWidgetItem(generalParentItem, "Максимальная высота от моря, м",
+                      QString::number(maxAltitude, 'f', 3));
+    setItemToDatabase(
+        mainQuery,
+        insertGeneralTableParameters.arg("Максимальная высота от моря, м")
+            .arg(QString::number(maxAltitude, 'f', 3)));
+    setTreeWidgetItem(generalParentItem, "Записей в файле",
+                      QString::number(rowCount));
+    setItemToDatabase(
+        mainQuery,
+        insertGeneralTableParameters.arg("Записей в файле")
+            .arg(QString::number(rowCount)));
 
+
+    mainQuery->~QSqlQuery();
+}
+
+void StatisticsWindow::setTreeWidgetItem(QTreeWidgetItem *parent,
+                                         QString firstColumn,
+                                         QString secondColumn) {
+    QTreeWidgetItem *childItem = new QTreeWidgetItem(parent);
+    childItem->setText(0, firstColumn);
+    childItem->setText(1, secondColumn);
+}
+
+void StatisticsWindow::setItemToDatabase(QSqlQuery *query, QString parameter) {
+    query->exec(parameter);
+}
+
+void StatisticsWindow::on_bbConfirm_clicked(QAbstractButton *button) {
+    Q_UNUSED(button)
+    QSqlDatabase::database("setStatisticsConnection").close();
+    QSqlDatabase::removeDatabase("setStatisticsConnection");
+    QSqlDatabase::database("getStatisticsConnection").close();
+    QSqlDatabase::removeDatabase("getStatisticsConnection");
+    emit statsWindowClosed();
 }
 
 
+void StatisticsWindow::on_twStatistics_expanded(const QModelIndex &index) {
+    Q_UNUSED(index)
+    ui->twStatistics->resizeColumnToContents(0);
+}
+
+
+void StatisticsWindow::on_twStatistics_collapsed(const QModelIndex &index){
+    Q_UNUSED(index)
+    ui->twStatistics->resizeColumnToContents(0);
+}
+
+
+void StatisticsWindow::on_StatisticsWindow_finished(int result)
+{
+    Q_UNUSED(result)
+    QSqlDatabase::database("setStatisticsConnection").close();
+    QSqlDatabase::removeDatabase("setStatisticsConnection");
+    QSqlDatabase::database("getStatisticsConnection").close();
+    QSqlDatabase::removeDatabase("getStatisticsConnection");
+    emit statsWindowClosed();
+}
 

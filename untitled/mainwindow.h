@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 #include <chart.h>
 #include <chartview.h>
+#include <statisticswindow.h>
 #include <QtWidgets>
 #include <QtSql>
 #include <QtCharts>
@@ -79,6 +80,7 @@ private:
      Ui::MainWindow *ui;
     QGraphicsScene *scene;
     //QQuickWidget* m_quickWidget;
+    StatisticsWindow *statsWindow;
     QString fileName;
     QString fileNameShort;
     int numberOfRows;
@@ -113,7 +115,7 @@ private:
     bool fixAxisXWasChecked;
     bool loadedFileCorrupted = false;
 
-
+    double prevZoom;
 
     void connectSignals();
 
@@ -153,12 +155,14 @@ public slots:
 
     void dbError();
     void dbErrorClear();
+    //void clearDBFromNotExistingFiles();
     void saveDB(int _numberOfRows, QString _fileName, QString _description);
     void onDBProgressChanged(int progress);
     void onDBProgressBarVisibilityChanged();
     void on_cbChartRow_currentIndexChanged(int index);
 
     void startStatsWindow(bool);
+    void finishStatsWindow();
 
 signals:
     void setMapPlugin(QString plugin);
@@ -231,6 +235,7 @@ private slots:
     void on_cbChartTheme_currentIndexChanged(int index);
     void on_sbChartPenWidth_valueChanged(int arg1);
     void on_pbStartStatsWindow_clicked();
+    void on_cbMapZoomLevel_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H
