@@ -1091,9 +1091,9 @@ void MainWindow::installESRIPlugin() {
     ui->cbMapDPISelection->setEnabled(false);
     ui->cbMapDPISelection->clear();
     ui->cbMapDPISelection->addItem("ESRI");
+    ui->cbMapType->setEnabled(true);
     if (fileNameShort != "") {
         ui->pbAddMap->setEnabled(true);
-        ui->cbMapType->setEnabled(true);
     }
     ui->pbClearMap->setEnabled(true);
 }
