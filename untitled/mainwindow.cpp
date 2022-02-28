@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     // this->setFixedSize(this->width(), this->height());
     connectSignals();
     ui->lblChartOptimizationsWarning->setVisible(false);
-    ui->lblDBErrorWarning->setVisible(false);
+    ui->lblErrorWarning->setVisible(false);
     setFont(QFont("Century Gothic",10));
 
     QPalette *palette = new QPalette;
@@ -229,7 +229,6 @@ void MainWindow::connectSignals() {
 
     connect(this, SIGNAL(open(QSqlDatabase)), this, SLOT(openTable(QSqlDatabase)));
     connect(this, SIGNAL(openStatsWindow(bool)), this, SLOT(startStatsWindow(bool)));
-
 }
 MainWindow::~MainWindow()
 {
@@ -351,6 +350,11 @@ void MainWindow::setMapInfo(double latitude, double longitude, double zoom) {
     ui->sbMapCenterLatValue->setValue(latitude);
     ui->sbMapCenterLonValue->setValue(longitude);
     ui->sbMapZoomLevelValue->setValue(zoom);
+
+}
+
+void MainWindow::on_cbMapZoomLevel_currentIndexChanged(int index) {
+    emit setMapZoomLevel(index + 2);
 }
 
 void MainWindow::on_sbMapCenterLatValue_valueChanged(double arg1) {
@@ -363,6 +367,12 @@ void MainWindow::on_sbMapCenterLonValue_valueChanged(double arg1)
 }
 
 void MainWindow::on_sbMapZoomLevelValue_valueChanged(double arg1) {
+    if (arg1 - prevZoom > 0) {
+        ui->cbMapZoomLevel->setCurrentIndex(qCeil(arg1) - 2);
+    } else {
+        ui->cbMapZoomLevel->setCurrentIndex(qFloor(arg1) - 2);
+    }
+    prevZoom = arg1;
     emit setMapZoomLevel(arg1);
 }
 
@@ -412,7 +422,7 @@ int MainWindow::countInsertQueryRows(QFile *file) {
                 text = text.arg(QString::number(
                     static_cast<double>(100 * sizeof(tmpData) * static_cast<double>(rows)) /
                         static_cast<double>(file->size()),'f',4));
-                ui->lblDBErrorWarning->setText(text);
+                ui->lblErrorWarning->setText(text);
                 emit dbErrorAppeared();
                 return rows;
             }
@@ -618,11 +628,15 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
 }
 
 void MainWindow::startStatsWindow(bool _isSet) {
-    StatisticsWindow *statsWindow = new StatisticsWindow();
+    ui->pbStartStatsWindow->setEnabled(false);
+    ui->pbStartStatsWindow->setText("Открыть статистику последнего сохранения");
+    statsWindow = new StatisticsWindow();
     statsWindow->setFileName(fileNameShort);
     statsWindow->setFilePath(fileName);
     statsWindow->setFileRowCount(numberOfRows);
     statsWindow->setFileCorruption(loadedFileCorrupted);
+    connect(statsWindow, SIGNAL(statsWindowClosed()), this,
+            SLOT(finishStatsWindow()));
     if (_isSet) {
         connect(this, SIGNAL(setStatsWindow()), statsWindow, SLOT(setStats()));
         emit setStatsWindow();
@@ -633,6 +647,13 @@ void MainWindow::startStatsWindow(bool _isSet) {
     statsWindow->show();
 }
 
+void MainWindow::finishStatsWindow() {
+    ui->pbStartStatsWindow->setEnabled(true);
+
+    disconnect(this, nullptr, statsWindow, nullptr);
+    disconnect(statsWindow, nullptr, this, nullptr);
+}
+
 void MainWindow::on_pbStartStatsWindow_clicked() {
     if (fileNameShort == "") {
         return;
@@ -641,17 +662,19 @@ void MainWindow::on_pbStartStatsWindow_clicked() {
 }
 
 void MainWindow::dbError() {
-    ui->lblDBErrorWarning->setVisible(true);
+    ui->lblErrorWarning->setVisible(true);
     loadedFileCorrupted = true;
     QTimer::singleShot(3000, this, SLOT(dbErrorClear()));
 }
 
 void MainWindow::dbErrorClear() {
-    ui->lblDBErrorWarning->setVisible(false);
+    ui->lblErrorWarning->setVisible(false);
+
 }
 
 void MainWindow::on_pbDBSave_clicked() {
     dbErrorClear();
+    loadedFileCorrupted = false;
     FileDialog *dialog = new FileDialog();
     dialog->show();
     dialog->exec();
@@ -678,9 +701,6 @@ void MainWindow::on_pbDBSave_clicked() {
 
     QFuture<void> future = QtConcurrent::run(
         this, &MainWindow::saveDB, numberOfRows, fileName, description);
-
-
-    loadedFileCorrupted = false;
 }
 
 void MainWindow::openTable(QSqlDatabase _db) {
@@ -699,11 +719,13 @@ void MainWindow::openTable(QSqlDatabase _db) {
 }
 
 void MainWindow::on_pbSetChart_clicked() {
+    QSqlDatabase::database("chartConnection").close();
+    QSqlDatabase::removeDatabase("chartConnection");
     if (fileNameShort.isEmpty()) {
         return;
     }
-    QSqlDatabase::database("chartConnection").close();
-    QSqlDatabase::removeDatabase("chartConnection");
+    //QSqlDatabase::database("chartConnection").close();
+    //QSqlDatabase::removeDatabase("chartConnection");
     Chart *chart = new Chart();
     connect(this, SIGNAL(drawChart()), chart, SLOT(compute()));
     connect(this, SIGNAL(setChartTableName(QString)), chart,
@@ -797,10 +819,14 @@ void MainWindow::onChartPointsValueChanged(int coords) {
     ui->lblChartPointsValue->setText(QString::number(coords));
 }
 
-void MainWindow::on_pbDeleteChart_clicked() { emit clearChart();
+void MainWindow::on_pbDeleteChart_clicked() {
+    emit clearChart();
 }
 
 void MainWindow::on_pbSaveFile_clicked() {
+    if (fileNameShort == "") {
+        return;
+    }
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBToFile");
     _db.setDatabaseName(QDir::currentPath() + "/databases/" + fileNameShort +
                         ".sqlite");
@@ -945,6 +971,9 @@ void MainWindow::on_pbDBTableDelete_clicked() {
     ui->teDBTableDescription->setText("");
     ui->pbDbTableChangeDescription->setEnabled(false);
 
+    ui->pbDBTableDelete->setEnabled(false);
+    ui->pbStartStatsWindow->setEnabled(false);
+    ui->pbSaveFile->setEnabled(false);
     ui->pbAddMap->setEnabled(false);
     ui->pbSetChart->setEnabled(false);
     ui->pbDeleteChart->setEnabled(false);
@@ -1135,7 +1164,6 @@ void MainWindow::on_pbMapCircleBorderColor_clicked() {
     colorDialog.close();
 }
 
-
 void MainWindow::on_sbMapCircleBorderWidth_valueChanged(int arg1) {
     emit setMapCircleBorderWidth(arg1);
 }
@@ -1144,7 +1172,6 @@ void MainWindow::on_sbMapCircleBorderWidth_valueChanged(int arg1) {
 void MainWindow::on_sbMapCircleRadius_valueChanged(int arg1) {
     emit setMapCircleRadius(arg1);
 }
-
 
 void MainWindow::on_pbMapCircleColor_clicked() {
     QColorDialog colorDialog;
@@ -1161,7 +1188,6 @@ void MainWindow::on_pbMapCircleColor_clicked() {
     colorDialog.close();
 }
 
-
 void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
 {
     if (arg1 == 2) {
@@ -1177,7 +1203,6 @@ void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
     }
 }
 
-
 void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     if (ui->tvSqlTable->model() != nullptr) {
         ui->tvSqlTable->model()->~QAbstractItemModel();
@@ -1187,6 +1212,8 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     QString connectionName = "dbOpened";
     QSqlDatabase::database(connectionName).close();
     QSqlDatabase::removeDatabase(connectionName);
+
+    ui->pbStartStatsWindow->setText("Открыть статистику");
 
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
     _db.setDatabaseName("databases/" + fileName);
@@ -1206,16 +1233,13 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     ui->pbAddMap->setEnabled(true);
     ui->pbClearMap->setEnabled(true);
     }
-    // ui->cbMapType->setEnabled(true);
+    ui->pbDBTableDelete->setEnabled(true);
+    ui->pbStartStatsWindow->setEnabled(true);
+    ui->pbSaveFile->setEnabled(true);
     ui->pbSetChart->setEnabled(true);
     ui->pbDeleteChart->setEnabled(true);
     openTable(_db);
-    //emit open(_db);
-    //_db.close();
-    //_db.~QSqlDatabase();
-    //_db.removeDatabase(_db.connectionName());
 }
-
 
 void MainWindow::on_pbChartPenColorSelection_clicked() {
     QColorDialog colorDialog;
@@ -1232,7 +1256,6 @@ void MainWindow::on_pbChartPenColorSelection_clicked() {
     colorDialog.close();
 }
 
-
 void MainWindow::on_cbChartTheme_currentIndexChanged(int index) {
     emit setChartTheme(index);
     if (index == 0) {
@@ -1245,14 +1268,9 @@ void MainWindow::on_cbChartTheme_currentIndexChanged(int index) {
     }
 }
 
-
 void MainWindow::on_sbChartPenWidth_valueChanged(int arg1)
 {
     emit setChartPen(QPen(QColor(ui->wChartPenColorDisplay->palette().color(
                               ui->wChartPenColorDisplay->palette().currentColorGroup(),
                               ui->wChartPenColorDisplay->backgroundRole())),arg1,Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
-
-
-
-

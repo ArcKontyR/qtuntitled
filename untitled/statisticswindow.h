@@ -2,6 +2,7 @@
 #define STATISTICSWINDOW_H
 #include <QtGui>
 #include <QtWidgets>
+#include <QtSql>
 
 namespace Ui {
 class StatisticsWindow;
@@ -26,13 +27,26 @@ public slots:
     void setStats();
     void getStats();
 
+signals:
+    void statsWindowClosed();
 private slots:
+    void on_bbConfirm_clicked(QAbstractButton *button);
+
+    void on_twStatistics_expanded(const QModelIndex &index);
+
+    void on_twStatistics_collapsed(const QModelIndex &index);
+
+    void on_StatisticsWindow_finished(int result);
+
 private:
     Ui::StatisticsWindow *ui;
     QString fileName;
     QString filePath;
     int rowCount;
     bool isCorrupted;
+
+    void setTreeWidgetItem(QTreeWidgetItem *, QString, QString);
+    void setItemToDatabase(QSqlQuery*, QString);
 };
 
 #endif // STATISTICSWINDOW_H
