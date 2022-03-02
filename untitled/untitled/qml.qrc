@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>map.qml</file>
-        <file>icon.jpg</file>
-    </qresource>
-    <qresource prefix="/offline_tiles"/>
-</RCC>
