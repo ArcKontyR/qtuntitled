@@ -1,0 +1,1411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1337</width>
+    <height>735</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Модуль A</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_3" rowstretch="1,0">
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <property name="rightMargin">
+         <number>100</number>
+        </property>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblSelectedDB">
+          <property name="text">
+           <string>Данные взяты из базы -</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblSelectedDBValue">
+          <property name="text">
+           <string>-</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tabMap">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <attribute name="title">
+          <string>Карта</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="1" column="0">
+           <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+            <item row="2" column="4">
+             <widget class="QPushButton" name="pbMapSelectionAccept">
+              <property name="text">
+               <string>ОК</string>
+              </property>
+             </widget>
+            </item>
+            <item row="17" column="1" colspan="4">
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="2" colspan="2">
+             <widget class="QComboBox" name="cbMapDPISelection">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <item>
+               <property name="text">
+                <string>Высокое</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Низкое</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="12" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbMapCirclesDrawing">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Отрисовывать координаты точками</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCircleBorderColor">
+              <property name="text">
+               <string>Цвет обводки</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCenterLon">
+              <property name="text">
+               <string>Долгота</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="3" colspan="2">
+             <widget class="QDoubleSpinBox" name="sbMapCoordDensityValue">
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="minimum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100000.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="lblMapType_3">
+              <property name="text">
+               <string>Качество</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCircleColor">
+              <property name="text">
+               <string>Цвет точки</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapDrawingWidth">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Размер линии</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="4">
+             <widget class="QWidget" name="wMapCircleBorderColorDisplay" native="true">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3" colspan="2">
+             <widget class="QDoubleSpinBox" name="sbMapCenterLatValue">
+              <property name="decimals">
+               <number>9</number>
+              </property>
+              <property name="minimum">
+               <double>-64.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>64.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::DefaultStepType</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="3">
+             <widget class="QPushButton" name="pbMapDrawingColorSelection">
+              <property name="text">
+               <string>Выбрать</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="4">
+             <widget class="QComboBox" name="cbMapZoomLevel">
+              <item>
+               <property name="text">
+                <string>1:250млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:150млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:70млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:35млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:15млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:10млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:4млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:2млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:1млн</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:500000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:250000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:150000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:70000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:35000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:15000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:8000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:4000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1:2000</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="16" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCircleRadius">
+              <property name="text">
+               <string>Радиус</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapZoom">
+              <property name="text">
+               <string>Масштаб</string>
+              </property>
+             </widget>
+            </item>
+            <item row="19" column="1" colspan="4">
+             <widget class="QProgressBar" name="prbrMapDrawing">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="format">
+               <string>%p%</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCoordCount">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Отрисовано точек</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="4">
+             <widget class="QPushButton" name="pbAddMap">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Создать маршрут по данным из базы</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="3">
+             <widget class="QPushButton" name="pbMapCircleBorderColor">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Выбрать</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="20">
+             <widget class="QQuickWidget" name="qwMap">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="resizeMode">
+               <enum>QQuickWidget::SizeRootObjectToView</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2" colspan="3">
+             <widget class="QComboBox" name="cbMapType">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCircleBorderWidth">
+              <property name="text">
+               <string>Ширина обводки</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="3" colspan="2">
+             <widget class="QLabel" name="lblMapCoordCountValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="4">
+             <widget class="QWidget" name="wMapCircleColorDisplay" native="true">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="18" column="1" colspan="4">
+             <widget class="QLabel" name="lblMapCoordDensityWarning">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCenterLat">
+              <property name="text">
+               <string>Широта</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="3">
+             <widget class="QPushButton" name="pbMapCircleColor">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Выбрать</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4">
+             <widget class="QPushButton" name="pbMapDPISelectionAccept">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>ОК</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3" colspan="2">
+             <widget class="QDoubleSpinBox" name="sbMapCenterLonValue">
+              <property name="decimals">
+               <number>9</number>
+              </property>
+              <property name="minimum">
+               <double>-180.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>180.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2" colspan="2">
+             <widget class="QComboBox" name="cbMapSelection">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <item>
+               <property name="text">
+                <string>OpenStreetMap</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>ESRI</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="4">
+             <widget class="QPushButton" name="pbClearMap">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Сбросить карту</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="3" colspan="2">
+             <widget class="QDoubleSpinBox" name="sbMapDrawingWidthValue">
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="minimum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>20.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3">
+             <widget class="QDoubleSpinBox" name="sbMapZoomLevelValue">
+              <property name="decimals">
+               <number>5</number>
+              </property>
+              <property name="minimum">
+               <double>2.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>19.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.120000000000000</double>
+              </property>
+              <property name="value">
+               <double>2.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="16" column="3" colspan="2">
+             <widget class="QSpinBox" name="sbMapCircleRadius">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>25</number>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="4">
+             <widget class="QWidget" name="wMapDrawingColorDisplay" native="true">
+              <property name="mouseTracking">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapDrawingColor">
+              <property name="text">
+               <string>Цвет линии</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLabel" name="lblMapType">
+              <property name="text">
+               <string>Тип</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="QLabel" name="lblMapCoordDensity">
+              <property name="text">
+               <string>Плотность точек</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="3" colspan="2">
+             <widget class="QSpinBox" name="sbMapCircleBorderWidth">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>50</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
+              <property name="displayIntegerBase">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblMapType_2">
+              <property name="text">
+               <string>Карта</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabChart">
+         <attribute name="title">
+          <string>График</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0" columnstretch="130,0,1,1,2">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <property name="spacing">
+             <number>5</number>
+            </property>
+            <item row="9" column="3" colspan="2">
+             <widget class="QComboBox" name="cbChartTheme">
+              <item>
+               <property name="text">
+                <string>Светлая</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Лазурно-голубая</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Темная</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Песочно-коричневая</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Синяя</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Высокий контраст</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Ледяная</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>QT</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartPenColor">
+              <property name="text">
+               <string>Цвет линии</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1" colspan="4">
+             <widget class="QPushButton" name="pbDeleteChart">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Стереть график</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="1" colspan="4">
+             <widget class="QProgressBar" name="prbrChartDrawing">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="format">
+               <string>%p%</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3">
+             <widget class="QDoubleSpinBox" name="sbChartAODensity">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="minimum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100000.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartAODensity">
+              <property name="text">
+               <string>Отрисовывать каждую</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="4">
+             <widget class="QLabel" name="lblChartAODensity_2">
+              <property name="text">
+               <string>точку</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartUseAltOptimization">
+              <property name="text">
+               <string>Ручное сокращение количества точек</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="1" colspan="4">
+             <widget class="QPushButton" name="pbSetChart">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Создать график</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" colspan="3">
+             <widget class="QComboBox" name="cbChartRow">
+              <item>
+               <property name="text">
+                <string>Индекс</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>SNS</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>SND</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="2" colspan="3">
+             <widget class="QComboBox" name="cbChartColumn">
+              <item>
+               <property name="text">
+                <string>Навигационный алгоритм</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Продольная земная скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Вертикальная земная скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Боковая земная скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Воздушная скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Крен</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Тангаж</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Курс</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Курс магнитный</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Широта</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Долгота</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Высота</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Ox скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Oy скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Oz скорость</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Угол атаки</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Угол скольжения</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Барометрическая высота</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Статическое давление</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Температура наружного воздуха</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Продольная перегрузка</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Вертикальная перегрузка</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Боковая перегрузка</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Путевой угол</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Направление ветра</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Скорость ветра</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Номер прошивки ОВ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Версия ОВ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Номер прошивки НВ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Версия НВ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Номер НВ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Время до окончания выставки или прогрева</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Режим работы БИВ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Счетчик UDP пакетов</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Время системы в сек</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Время настройки БИВ в часах</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Приоритет источника</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Мл. байт число GPS</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Режим работы SNS</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Заданный режим работы SNS</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Биты достоверности данных</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Признаки исправности РЛК</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Статус приема данных</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="lblY">
+              <property name="text">
+               <string>Ось Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartPoints">
+              <property name="text">
+               <string>Отрисовано точек</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="4">
+             <widget class="QWidget" name="wChartPenColorDisplay" native="true">
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3">
+             <widget class="QPushButton" name="pbChartPenColorSelection">
+              <property name="text">
+               <string>Выбрать</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartUseOptimization">
+              <property name="text">
+               <string>Автоматическое сокращение количества точек</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartFixAxisY">
+              <property name="text">
+               <string>Зафиксировать значения оси Y</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="lblX">
+              <property name="text">
+               <string>Ось X</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartTheme">
+              <property name="text">
+               <string>Тема графика</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="4">
+             <widget class="QCheckBox" name="chbChartFixAxisX">
+              <property name="text">
+               <string>Зафиксировать значения оси X</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="16">
+             <widget class="ChartView" name="chartView"/>
+            </item>
+            <item row="11" column="1" colspan="4">
+             <widget class="QLabel" name="lblChartOptimizationsWarning">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <italic>false</italic>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(170, 0, 0);
+font: 10pt &quot;Century Gothic&quot;;</string>
+              </property>
+              <property name="text">
+               <string>Использование автоматического и ручного сокращения количества точек не рекомендуется</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QLabel" name="lblChartPenWidth">
+              <property name="text">
+               <string>Размер линии</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="3" colspan="2">
+             <widget class="QSpinBox" name="sbChartPenWidth">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="4">
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="12" column="3" colspan="2">
+             <widget class="QLabel" name="lblChartPointsValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabDB">
+         <property name="contextMenuPolicy">
+          <enum>Qt::PreventContextMenu</enum>
+         </property>
+         <attribute name="title">
+          <string>База</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="2" column="2">
+             <widget class="QLabel" name="lblSqlDBSelectedValue">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="12">
+             <widget class="QTableView" name="tvSqlTable">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBSave">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Выбрать и сохранить файл в базу</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QTextEdit" name="teDBTableDescription"/>
+            </item>
+            <item row="11" column="1" colspan="2">
+             <widget class="QLabel" name="lblErrorWarning">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblSqlSelected">
+              <property name="text">
+               <string>Выбрано:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="2">
+             <widget class="QProgressBar" name="prbrDBSave">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="format">
+               <string>%p%</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QPushButton" name="pbStartStatsWindow">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Открыть статистику</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" rowspan="2" colspan="2">
+             <widget class="QTreeView" name="tvDatabases">
+              <property name="minimumSize">
+               <size>
+                <width>280</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLabel" name="lblDBTableDescription">
+              <property name="text">
+               <string>Описание</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="2">
+             <widget class="QPushButton" name="pbSaveFile">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Сохранить данные базы в файл</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBTableDelete">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Удалить базу</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDbTableChangeDescription">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Изменить описание</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1337</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QQuickWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QtQuickWidgets/QQuickWidget</header>
+  </customwidget>
+  <customwidget>
+   <class>ChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>chartview.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
