@@ -74,8 +74,6 @@ public:
     ~MainWindow() override;
     Q_INVOKABLE void setMapInfo(double latitude, double longitude, double zoom);
 
-
-
 private:
      Ui::MainWindow *ui;
     QGraphicsScene *scene;
@@ -123,43 +121,38 @@ public slots:
 
     void on_pbAddMap_clicked();
     void updateFilePath();
+    void on_pbClearMap_clicked();
+    void on_sbMapCenterLatValue_valueChanged(double arg1);
+    void on_sbMapCenterLonValue_valueChanged(double arg1);
+    void on_sbMapZoomLevelValue_valueChanged(double arg1);
+    void on_cbMapType_currentIndexChanged(int index);
+    void setMapPath();
+    void clearMapFromPath();
+    void onMapDrawingProgressChanged(int progress);
+    void onMapDrawingProgressBarVisibilityChanged();
+    void onMapCoordCountValueChanged(int coords);
+    void on_sbMapCoordDensityValue_valueChanged(double arg1);
+
+    void on_cbChartRow_currentIndexChanged(int index);
+    void onChartDrawingProgressChanged(int progress);
+    void onChartDrawingProgressBarVisibilityChanged();
+    void onChartPointsValueChanged(int coords);
+
+    int countSelectQueryRows(QSqlQuery*);
+    int countInsertQueryRows(QFile *file);
+
+    void dbError();
+    void dbErrorClear();
+    void saveDB(int _numberOfRows, QString _fileName, QString _description);
+    void onDBProgressChanged(int progress);
+    void onDBProgressBarVisibilityChanged();
     void on_pbDBSave_clicked();
     void openTable(QSqlDatabase _db);
     void on_pbSetChart_clicked();
     void on_pbSaveFile_clicked();
     void on_pbDBTableDelete_clicked();
     void on_pbDeleteChart_clicked();
-
-    void on_pbClearMap_clicked();
-    void on_sbMapCenterLatValue_valueChanged(double arg1);
-    void on_sbMapCenterLonValue_valueChanged(double arg1);
-    void on_sbMapZoomLevelValue_valueChanged(double arg1);
-    void on_cbMapType_currentIndexChanged(int index);
-
-    void on_sbMapCoordDensityValue_valueChanged(double arg1);
     void on_pbDbTableChangeDescription_clicked();
-
-    int countSelectQueryRows(QSqlQuery*);
-    int countInsertQueryRows(QFile *file);
-
-    void setMapPath();
-    void clearMapFromPath();
-    void onMapDrawingProgressChanged(int progress);
-    void onMapDrawingProgressBarVisibilityChanged();
-    void onMapCoordCountValueChanged(int coords);
-
-
-    void onChartDrawingProgressChanged(int progress);
-    void onChartDrawingProgressBarVisibilityChanged();
-    void onChartPointsValueChanged(int coords);
-
-    void dbError();
-    void dbErrorClear();
-    //void clearDBFromNotExistingFiles();
-    void saveDB(int _numberOfRows, QString _fileName, QString _description);
-    void onDBProgressChanged(int progress);
-    void onDBProgressBarVisibilityChanged();
-    void on_cbChartRow_currentIndexChanged(int index);
 
     void startStatsWindow(bool);
     void finishStatsWindow();
@@ -184,8 +177,6 @@ signals:
     void setMapDrawingProgressDisabled();
     void setMapCoordCountValue(int coords);
 
-    void open(QSqlDatabase);
-
     void setChartDatabase(QSqlDatabase);
     void setChartTableName(QString);
     void setChartFixXChecked(bool);
@@ -206,6 +197,7 @@ signals:
     void setChartDrawingProgressDisabled();
     void setChartPointsValue(int);
 
+    void open(QSqlDatabase);
     void dbErrorAppeared();
     void setDBProgress(int);
     void setDBProgressDisabled();
@@ -213,11 +205,15 @@ signals:
     void openStatsWindow(bool);
     void setStatsWindow();
     void getStatsWindow();
+
 private slots:
 
     void on_sbChartAODensity_valueChanged(double arg1);
     void on_chbChartUseAltOptimization_stateChanged(int arg1);
     void on_chbChartUseOptimization_stateChanged(int arg1);
+    void on_pbChartPenColorSelection_clicked();
+    void on_cbChartTheme_currentIndexChanged(int index);
+    void on_sbChartPenWidth_valueChanged(int arg1);
 
     void on_pbMapDrawingColorSelection_clicked();
     void on_sbMapDrawingWidthValue_valueChanged(double arg1);
@@ -230,12 +226,10 @@ private slots:
     void on_sbMapCircleRadius_valueChanged(int arg1);
     void on_pbMapCircleColor_clicked();
     void on_chbMapCirclesDrawing_stateChanged(int arg1);
-    void on_tvDatabases_doubleClicked(const QModelIndex &index);
-    void on_pbChartPenColorSelection_clicked();
-    void on_cbChartTheme_currentIndexChanged(int index);
-    void on_sbChartPenWidth_valueChanged(int arg1);
-    void on_pbStartStatsWindow_clicked();
     void on_cbMapZoomLevel_currentIndexChanged(int index);
+
+    void on_tvDatabases_doubleClicked(const QModelIndex &index);
+    void on_pbStartStatsWindow_clicked();
 };
 
 #endif // MAINWINDOW_H

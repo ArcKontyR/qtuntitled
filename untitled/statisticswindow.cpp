@@ -430,18 +430,15 @@ void StatisticsWindow::on_bbConfirm_clicked(QAbstractButton *button) {
     emit statsWindowClosed();
 }
 
-
 void StatisticsWindow::on_twStatistics_expanded(const QModelIndex &index) {
     Q_UNUSED(index)
     ui->twStatistics->resizeColumnToContents(0);
 }
 
-
 void StatisticsWindow::on_twStatistics_collapsed(const QModelIndex &index){
     Q_UNUSED(index)
     ui->twStatistics->resizeColumnToContents(0);
 }
-
 
 void StatisticsWindow::on_StatisticsWindow_finished(int result)
 {
@@ -452,4 +449,3 @@ void StatisticsWindow::on_StatisticsWindow_finished(int result)
     QSqlDatabase::removeDatabase("getStatisticsConnection");
     emit statsWindowClosed();
 }
-

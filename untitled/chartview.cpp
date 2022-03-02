@@ -18,7 +18,6 @@ void ChartView::mousePressEvent(QMouseEvent *event)
         m_lastMousePos = event->pos();
         event->accept();
     }
-
     QChartView::mousePressEvent(event);
 }
 
@@ -29,11 +28,8 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
     {
         auto dPos = event->pos() - m_lastMousePos;
         chart()->scroll(-dPos.x(), dPos.y());
-
         m_lastMousePos = event->pos();
         event->accept();
-
-
     }
     QApplication::restoreOverrideCursor();
     QChartView::mouseMoveEvent(event);

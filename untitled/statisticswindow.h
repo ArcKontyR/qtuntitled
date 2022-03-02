@@ -12,12 +12,12 @@ class StatisticsWindow : public QDialog
 {
     Q_OBJECT
 
-        public:
-                 explicit StatisticsWindow(QWidget *parent = nullptr);
-    ~StatisticsWindow();
+public:
+    explicit StatisticsWindow(QWidget *parent = nullptr);
+    ~StatisticsWindow() override;
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 
 public slots:
     void setFileName(QString);

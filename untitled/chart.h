@@ -6,16 +6,10 @@
 #include <QtSql>
 #include <QObject>
 
-// class QLineSeries;
-// class QValueAxis;
-// class QDateTimeAxis;
-
 class Chart : public QChart {
     Q_OBJECT
 public:
     Chart(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
-    // void setSqlQueryString(QString query);
-
 
 public slots:
     void setDatabase(QSqlDatabase);
@@ -69,12 +63,12 @@ private:
     qreal m_yLim;
     qreal m_xMin;
     bool isYMinZero;
-    // bool wasChecked;
     bool fixXIsChecked;
     bool fixYIsChecked;
     bool useOptimization;
     bool useAltOptimization;
     int aoDensity;
+
 signals:
     void getNumberOfRows(QSqlQuery *);
     void setDrawingProgress(int);
@@ -86,4 +80,3 @@ private slots:
 };
 
 #endif // CHART_H
-

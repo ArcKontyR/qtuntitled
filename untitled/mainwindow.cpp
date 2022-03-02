@@ -17,12 +17,17 @@ MainWindow::MainWindow(QWidget *parent)
       , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // this->setFixedSize(this->width(), this->height());
     connectSignals();
-    ui->lblChartOptimizationsWarning->setVisible(false);
-    ui->lblErrorWarning->setVisible(false);
     setFont(QFont("Century Gothic",10));
 
+    /*--Отключение временных виджетов--*/
+    ui->lblChartOptimizationsWarning->setVisible(false);
+    ui->lblErrorWarning->setVisible(false);
+    ui->prbrDBSave->setVisible(false);
+    ui->prbrMapDrawing->setVisible(false);
+    ui->prbrChartDrawing->setVisible(false);
+
+    /*--Установка базовых цветов--*/
     QPalette *palette = new QPalette;
     palette->setColor(ui->wMapCircleColorDisplay->backgroundRole(), Qt::black);
     ui->wMapCircleColorDisplay->setPalette(*palette);
@@ -35,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->wChartPenColorDisplay->setPalette(*palette);
     palette->~QPalette();
 
+    /*--Настройка пути к базам--*/
     QFileSystemModel *systemModel = new QFileSystemModel;
     if (!QDir(QDir::currentPath() + "/databases").exists()) {
         QDir(QDir::currentPath()).mkdir("databases");
@@ -44,11 +50,10 @@ MainWindow::MainWindow(QWidget *parent)
     systemModel->setNameFilterDisables(false);
     connect(systemModel, SIGNAL(directoryLoaded(QString)), this,
             SLOT(updateFilePath()));
-
     ui->tvDatabases->setModel(systemModel);
     ui->tvDatabases->setRootIndex(systemModel->index(QDir::currentPath() + "/databases"));
-    /*--Настройка баз данных--*/
 
+    /*--Настройка баз данных--*/
     db = QSqlDatabase::addDatabase("QSQLITE","mainConnection");
     db.setDatabaseName("mainDatabase.sqlite");
     db.open();
@@ -195,25 +200,18 @@ MainWindow::MainWindow(QWidget *parent)
                         << "pni_bits"
                         << "fix_bits"
                         << "recv_status";
-
-    /*--Настройка карты--*/
-
-
-
-    /*--Настройка прогресс бара--*/
-
-    ui->prbrDBSave->setVisible(false);
-    ui->prbrMapDrawing->setVisible(false);
-    ui->prbrChartDrawing->setVisible(false);
 }
 
 void MainWindow::updateFilePath() {
+    /*--Очистка главной базы от записей несуществующих баз--*/
     if (!QFile(QDir::currentPath() + "/databases/" + fileNameShort + ".sqlite")
              .exists()) {
         on_pbDBTableDelete_clicked();
     }
 }
+
 void MainWindow::connectSignals() {
+    /*--Подключение сигналов к слотам для работы элементов--*/
     connect(this, SIGNAL(setMapDrawingProgress(int)), this,
             SLOT(onMapDrawingProgressChanged(int)));
     connect(this, SIGNAL(setMapDrawingProgressDisabled()), this,
@@ -230,10 +228,14 @@ void MainWindow::connectSignals() {
     connect(this, SIGNAL(open(QSqlDatabase)), this, SLOT(openTable(QSqlDatabase)));
     connect(this, SIGNAL(openStatsWindow(bool)), this, SLOT(startStatsWindow(bool)));
 }
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+/*--Методы, связанные с картами--*/
+
 void MainWindow::clearMapFromPath() {
     emit clearMapCoordinates();
     ui->lblMapCoordCountValue->setText("0");
@@ -252,18 +254,6 @@ void MainWindow::onMapDrawingProgressBarVisibilityChanged() {
 
 void MainWindow::onMapCoordCountValueChanged(int coords) {
     ui->lblMapCoordCountValue->setText(QString::number(coords));
-}
-
-int MainWindow::countSelectQueryRows(QSqlQuery *query) {
-    int numberOfRows = 0;
-
-    if (query->last()) {
-        numberOfRows = query->at() + 1;
-        query->first();
-        query->previous();
-    }
-    emit setChartNumberOfRows(numberOfRows);
-    return numberOfRows;
 }
 
 void MainWindow::setMapPath() {
@@ -380,17 +370,215 @@ void MainWindow::on_cbMapType_currentIndexChanged(int index) {
     emit setMapType(index);
 }
 
+void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
+    if (arg1 >= 301 && arg1 <= 500) {
+        ui->lblMapCoordDensityWarning->setText(
+            "Для лучшего качества уменьшите значение параметра");
+        ui->lblMapCoordDensityWarning->setStyleSheet("color: orange; font: 10pt \"Century Gothic\";");
+    }else
+        if(arg1 >= 501 && arg1 <=1000){
+            ui->lblMapCoordDensityWarning->setText("Рекомендуется уменьшить значение параметра");
+            ui->lblMapCoordDensityWarning->setStyleSheet("color: red; font: 10pt \"Century Gothic\";");
+        } else
+            if(arg1>=1001) {
+                ui->lblMapCoordDensityWarning->setText("Веротна возможность неверного отображения");
+                ui->lblMapCoordDensityWarning->setStyleSheet("color: darkred; font: 10pt \"Century Gothic\";");
+            } else{
+                ui->lblMapCoordDensityWarning->setText("");
+            }
 
-void MainWindow::onDBProgressChanged(int progress) {
-    if (ui->prbrDBSave->isVisible() == false) {
-        ui->prbrDBSave->setVisible(true);
+    if (arg1 >= 300) {
+        ui->chbMapCirclesDrawing->setEnabled(true);
+    } else {
+        ui->chbMapCirclesDrawing->setEnabled(false);
     }
-    ui->prbrDBSave->setValue(progress);
 }
 
-void MainWindow::onDBProgressBarVisibilityChanged() {
-    ui->prbrDBSave->setVisible(false);
+void MainWindow::installOSMPlugin() {
+    QStringList list;
+    list << "Стандартный"
+         << "Велосипед"
+         << "Обществ. транспорт"
+         << "Ночной транспорт"
+         << "Местность"
+         << "Туризм";
+    emit setMapPlugin("osm");
+    ui->cbMapDPISelection->setEnabled(true);
+    ui->cbMapType->addItems(list);
+    ui->cbMapSelection->setEnabled(false);
+    ui->pbMapDPISelectionAccept->setEnabled(true);
+    ui->pbMapSelectionAccept->setEnabled(false);
 }
+
+void MainWindow::installESRIPlugin() {
+    QStringList list;
+    list << "Стандартный"
+         << "Спутник"
+         << "Базовая местность"
+         << "Топография"
+         << "Топография США"
+         << "Национальная"
+         << "Светло-серый холст"
+         << "Физическая"
+         << "Затененный рельеф"
+         << "Мировой океан"
+         << "Темно-серый холст"
+         << "Карта Делорм";
+    emit setMapPlugin("esri");
+    ui->cbMapType->addItems(list);
+    ui->cbMapSelection->setEnabled(false);
+    ui->pbMapSelectionAccept->setEnabled(false);
+    ui->cbMapDPISelection->setEnabled(false);
+    ui->cbMapDPISelection->clear();
+    ui->cbMapDPISelection->addItem("ESRI");
+    ui->cbMapType->setEnabled(true);
+    if (fileNameShort != "") {
+        ui->pbAddMap->setEnabled(true);
+    }
+    ui->pbClearMap->setEnabled(true);
+}
+
+void MainWindow::on_pbMapDrawingColorSelection_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wMapDrawingColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wMapDrawingColorDisplay->setPalette(palette);
+    }
+    emit setMapLineColor(colorDialog.currentColor());
+    colorDialog.close();
+}
+
+void MainWindow::on_sbMapDrawingWidthValue_valueChanged(double arg1) {
+    emit setMapLineWidth(qFloor(arg1));
+}
+
+void MainWindow::on_pbMapSelectionAccept_clicked() {
+    ui->qwMap->setSource(QUrl("qrc:/map.qml"));
+    ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    engine = ui->qwMap->engine();
+    context = engine->rootContext();
+    context->setContextProperty(QStringLiteral("main"), this);
+    setMapInfo(56.394, 61.9334, 12);
+    emit setMapOfflineDirectory(QDir::currentPath() + "/offline_tiles/");
+    if (ui->cbMapSelection->currentText() == "OpenStreetMap") {
+        installOSMPlugin();
+    } else {
+        installESRIPlugin();
+    }
+}
+
+void MainWindow::on_pbMapDPISelectionAccept_clicked() {
+
+
+    ui->cbMapDPISelection->setEnabled(false);
+    ui->pbMapDPISelectionAccept->setEnabled(false);
+    if (fileNameShort != ""){
+        ui->pbAddMap->setEnabled(true);
+    }
+    ui->cbMapType->setEnabled(true);
+    ui->pbClearMap->setEnabled(true);
+    if (ui->cbMapDPISelection->currentText() == "Высокое") {
+        emit setMapHighDPI(true);
+    } else {
+        emit setMapHighDPI(false);
+    }
+}
+
+void MainWindow::on_pbMapCircleBorderColor_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wMapCircleBorderColorDisplay->setPalette(palette);
+        palette.~QPalette();
+    }
+
+    emit setMapCircleBorderColor(colorDialog.currentColor());
+    colorDialog.close();
+}
+
+void MainWindow::on_sbMapCircleBorderWidth_valueChanged(int arg1) {
+    emit setMapCircleBorderWidth(arg1);
+}
+
+void MainWindow::on_sbMapCircleRadius_valueChanged(int arg1) {
+    emit setMapCircleRadius(arg1);
+}
+
+void MainWindow::on_pbMapCircleColor_clicked() {
+    QColorDialog colorDialog;
+    colorDialog.show();
+    colorDialog.exec();
+    if (colorDialog.result()) {
+        QPalette palette;
+        palette.setColor(ui->wMapCircleColorDisplay->backgroundRole(),
+                         colorDialog.currentColor());
+        ui->wMapCircleColorDisplay->setPalette(palette);
+        palette.~QPalette();
+    }
+    emit setMapCircleColor(colorDialog.currentColor());
+    colorDialog.close();
+}
+
+void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
+{
+    if (arg1 == 2) {
+        ui->pbMapCircleBorderColor->setEnabled(true);
+        ui->pbMapCircleColor->setEnabled(true);
+        ui->sbMapCircleBorderWidth->setEnabled(true);
+        ui->sbMapCircleRadius->setEnabled(true);
+    } else {
+        ui->pbMapCircleBorderColor->setEnabled(false);
+        ui->pbMapCircleColor->setEnabled(false);
+        ui->sbMapCircleBorderWidth->setEnabled(false);
+        ui->sbMapCircleRadius->setEnabled(false);
+    }
+}
+
+/*--Методы, связанные с окном статистики--*/
+
+void MainWindow::startStatsWindow(bool _isSet) {
+    ui->pbStartStatsWindow->setEnabled(false);
+    ui->pbStartStatsWindow->setText("Открыть статистику последнего сохранения");
+    statsWindow = new StatisticsWindow();
+    statsWindow->setFileName(fileNameShort);
+    statsWindow->setFilePath(fileName);
+    statsWindow->setFileRowCount(numberOfRows);
+    statsWindow->setFileCorruption(loadedFileCorrupted);
+    connect(statsWindow, SIGNAL(statsWindowClosed()), this,
+            SLOT(finishStatsWindow()));
+    if (_isSet) {
+        connect(this, SIGNAL(setStatsWindow()), statsWindow, SLOT(setStats()));
+        emit setStatsWindow();
+    } else {
+        connect(this, SIGNAL(getStatsWindow()), statsWindow, SLOT(getStats()));
+        emit getStatsWindow();
+    }
+    statsWindow->show();
+}
+
+void MainWindow::finishStatsWindow() {
+    ui->pbStartStatsWindow->setEnabled(true);
+
+    disconnect(this, nullptr, statsWindow, nullptr);
+    disconnect(statsWindow, nullptr, this, nullptr);
+}
+
+void MainWindow::on_pbStartStatsWindow_clicked() {
+    if (fileNameShort == "") {
+        return;
+    }
+    emit openStatsWindow(false);
+}
+
+/*--Методы, связанные с базой данных--*/
 
 int MainWindow::countInsertQueryRows(QFile *file) {
     int rows = 0;
@@ -430,6 +618,29 @@ int MainWindow::countInsertQueryRows(QFile *file) {
         }
     }
     return rows;
+}
+
+int MainWindow::countSelectQueryRows(QSqlQuery *query) {
+    int numberOfRows = 0;
+
+    if (query->last()) {
+        numberOfRows = query->at() + 1;
+        query->first();
+        query->previous();
+    }
+    emit setChartNumberOfRows(numberOfRows);
+    return numberOfRows;
+}
+
+void MainWindow::onDBProgressChanged(int progress) {
+    if (ui->prbrDBSave->isVisible() == false) {
+        ui->prbrDBSave->setVisible(true);
+    }
+    ui->prbrDBSave->setValue(progress);
+}
+
+void MainWindow::onDBProgressBarVisibilityChanged() {
+    ui->prbrDBSave->setVisible(false);
 }
 
 void MainWindow::saveDB(int _numberOfRows, QString _fileName,
@@ -627,40 +838,6 @@ void MainWindow::saveDB(int _numberOfRows, QString _fileName,
     ui->tvDatabases->setEnabled(true);
 }
 
-void MainWindow::startStatsWindow(bool _isSet) {
-    ui->pbStartStatsWindow->setEnabled(false);
-    ui->pbStartStatsWindow->setText("Открыть статистику последнего сохранения");
-    statsWindow = new StatisticsWindow();
-    statsWindow->setFileName(fileNameShort);
-    statsWindow->setFilePath(fileName);
-    statsWindow->setFileRowCount(numberOfRows);
-    statsWindow->setFileCorruption(loadedFileCorrupted);
-    connect(statsWindow, SIGNAL(statsWindowClosed()), this,
-            SLOT(finishStatsWindow()));
-    if (_isSet) {
-        connect(this, SIGNAL(setStatsWindow()), statsWindow, SLOT(setStats()));
-        emit setStatsWindow();
-    } else {
-        connect(this, SIGNAL(getStatsWindow()), statsWindow, SLOT(getStats()));
-        emit getStatsWindow();
-    }
-    statsWindow->show();
-}
-
-void MainWindow::finishStatsWindow() {
-    ui->pbStartStatsWindow->setEnabled(true);
-
-    disconnect(this, nullptr, statsWindow, nullptr);
-    disconnect(statsWindow, nullptr, this, nullptr);
-}
-
-void MainWindow::on_pbStartStatsWindow_clicked() {
-    if (fileNameShort == "") {
-        return;
-    }
-    emit openStatsWindow(false);
-}
-
 void MainWindow::dbError() {
     ui->lblErrorWarning->setVisible(true);
     loadedFileCorrupted = true;
@@ -669,7 +846,6 @@ void MainWindow::dbError() {
 
 void MainWindow::dbErrorClear() {
     ui->lblErrorWarning->setVisible(false);
-
 }
 
 void MainWindow::on_pbDBSave_clicked() {
@@ -717,6 +893,214 @@ void MainWindow::openTable(QSqlDatabase _db) {
     }
     query->~QSqlQuery();
 }
+
+void MainWindow::on_pbDBTableDelete_clicked() {
+    if (ui->tvSqlTable->model() != nullptr) {
+        ui->tvSqlTable->model()->~QAbstractItemModel();
+    }
+    QString connectionName = "dbOpened";
+    QSqlDatabase::database(connectionName).close();
+    QSqlDatabase::removeDatabase(connectionName);
+    QFile::remove("databases/" + fileNameShort +
+                  ".sqlite");
+    QSqlQuery *query = new QSqlQuery(db);
+    QString strDeleteTable = "DELETE FROM MainTable WHERE name = '%1'";
+    strDeleteTable = strDeleteTable.arg(fileNameShort);
+    query->exec(strDeleteTable);
+    query->~QSqlQuery();
+    fileNameShort = "";
+    ui->lblSqlDBSelectedValue->setText("");
+    ui->lblSelectedDBValue->setText("");
+    ui->teDBTableDescription->setText("");
+    ui->pbDbTableChangeDescription->setEnabled(false);
+
+    ui->pbDBTableDelete->setEnabled(false);
+    ui->pbStartStatsWindow->setEnabled(false);
+    ui->pbSaveFile->setEnabled(false);
+    ui->pbAddMap->setEnabled(false);
+    ui->pbSetChart->setEnabled(false);
+    ui->pbDeleteChart->setEnabled(false);
+}
+
+void MainWindow::on_pbDbTableChangeDescription_clicked() {
+    QString strUpdate =
+        "UPDATE MainTable SET description = '%1' WHERE name == '%2'";
+    strUpdate = strUpdate.arg(ui->teDBTableDescription->toPlainText())
+                    .arg(fileNameShort);
+    QSqlQuery *query = new QSqlQuery(db);
+    query->exec(strUpdate);
+    query->~QSqlQuery();
+}
+
+void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
+    if (ui->tvSqlTable->model() != nullptr) {
+        ui->tvSqlTable->model()->~QAbstractItemModel();
+    }
+    QString fileName = index.siblingAtColumn(0).data().toString();
+    fileNameShort = fileName.split(".")[0];
+    QString connectionName = "dbOpened";
+    QSqlDatabase::database(connectionName).close();
+    QSqlDatabase::removeDatabase(connectionName);
+
+    ui->pbStartStatsWindow->setText("Открыть статистику");
+
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+    _db.setDatabaseName("databases/" + fileName);
+    _db.open();
+
+    QString strSelect = "SELECT * FROM MainTable WHERE name = '%1'";
+    strSelect = strSelect.arg(fileNameShort);
+    QSqlQuery *query = new QSqlQuery(db);
+    query->exec(strSelect);
+    query->first();
+    ui->lblSqlDBSelectedValue->setText(fileNameShort);
+    ui->lblSelectedDBValue->setText(fileNameShort);
+    ui->teDBTableDescription->setText(query->value(1).toString());
+    ui->pbDbTableChangeDescription->setEnabled(true);
+    //
+    if (ui->qwMap->source() != QUrl(nullptr)){
+        ui->pbAddMap->setEnabled(true);
+        ui->pbClearMap->setEnabled(true);
+    }
+    ui->pbDBTableDelete->setEnabled(true);
+    ui->pbStartStatsWindow->setEnabled(true);
+    ui->pbSaveFile->setEnabled(true);
+    ui->pbSetChart->setEnabled(true);
+    ui->pbDeleteChart->setEnabled(true);
+    openTable(_db);
+}
+
+/*--Методы, связанные с выгрузкой данных--*/
+
+void MainWindow::on_pbSaveFile_clicked() {
+    if (fileNameShort == "") {
+        return;
+    }
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBToFile");
+    _db.setDatabaseName(QDir::currentPath() + "/databases/" + fileNameShort +
+                        ".sqlite");
+    _db.open();
+    QSqlQuery *query = new QSqlQuery(_db);
+    QString strSelect = "SELECT * FROM DataTable";
+    if (!query->exec(strSelect)) {
+    }
+    //"	" - табуляция
+    int i = 0;
+    QString fileName =
+        QDateTime::currentDateTime().date().toString(Qt::ISODate) + "_" +
+        QString::number(QTime::currentTime().hour()) + "-" +
+        QString::number(QTime::currentTime().minute()) + "-" +
+        QString::number(QTime::currentTime().second()) + ".txt";
+    QFile *file = new QFile(fileName);
+    if (file->open(QIODevice::WriteOnly)) {
+        QTextStream stream(file);
+        stream << "	" << "NAV="  << "	"
+               << "nNavCounter" << "	"
+               << "sns_utc" << "	"
+               << "snd_utc" << "	"
+               << "V_X" << "	"
+               << "V_Y" << "	"
+               << "V_Z" << "	"
+               << "Vair" << "	"
+               << "roll" << "	"
+               << "pitch" << "	"
+               << "head" << "	"
+               << "head_magn" << "	"
+               << "B" << "	"
+               << "L" << "	"
+               << "h" << "	"
+               << "Wx" << "	"
+               << "Wy" << "	"
+               << "Wz" << "	"
+               << "alfa" << "	"
+               << "beta" << "	"
+               << "H_baro" << "	"
+               << "Pst" << "	"
+               << "Tnv" << "	"
+               << "Nx" << "	"
+               << "Ny" << "	"
+               << "Nz" << "	"
+               << "coarse" << "	"
+               << "WindDir" << "	"
+               << "WindV" << "	"
+               << "op_ns" << "	"
+               << "op_ver" << "	"
+               << "np_ns" << "	"
+               << "np_ver" << "	"
+               << "np_num" << "	"
+               << "align_time" << "	"
+               << "nav_mode" << "	"
+               << "nUDPCounter" << "	"
+               << "unix_time" << "	"
+               << "work_time" << "	"
+               << "priority" << "	"
+               << "gps_glo" << "	"
+               << "sns_mode" << "	"
+               << "sns_cmd" << "	"
+               << "pni_bits" << "	"
+               << "fix_bits" << "	"
+               << "recv_status" << "\r\n"
+            ;
+
+        while (query->next()) {
+            ++i;
+            stream << i << "	"
+                   << "NAV=" << "	"
+                   << query->value(0).toString() << "	"
+                   << query->value(1).toString() << "	" << "	"
+                   << query->value(2).toString() << "	"
+                   << query->value(3).toString() << "	"
+                   << query->value(4).toString() << "	"
+                   << query->value(5).toString() << "	"
+                   << query->value(6).toString() << "	"
+                   << query->value(7).toString() << "	"
+                   << query->value(8).toString() << "	"
+                   << query->value(9).toString() << "	"
+                   << query->value(10).toString() << "	"
+                   << query->value(11).toString() << "	"
+                   << query->value(12).toString() << "	"
+                   << query->value(13).toString() << "	"
+                   << query->value(14).toString() << "	"
+                   << query->value(15).toString() << "	"
+                   << query->value(16).toString() << "	"
+                   << query->value(17).toString() << "	"
+                   << query->value(18).toString() << "	"
+                   << query->value(19).toString() << "	"
+                   << query->value(20).toString() << "	"
+                   << query->value(21).toString() << "	"
+                   << query->value(22).toString() << "	"
+                   << query->value(23).toString() << "	"
+                   << query->value(24).toString() << "	"
+                   << query->value(25).toString() << "	"
+                   << query->value(26).toString() << "	"
+                   << query->value(27).toString() << "	"
+                   << query->value(28).toString() << "	"
+                   << query->value(29).toString() << "	"
+                   << query->value(30).toString() << "	"
+                   << query->value(31).toString() << "	"
+                   << query->value(32).toString() << "	"
+                   << query->value(33).toString() << "	"
+                   << query->value(34).toString() << "	"
+                   << query->value(35).toString() << "	"
+                   << query->value(36).toString() << "	"
+                   << query->value(37).toString() << "	"
+                   << query->value(38).toString() << "	"
+                   << query->value(39).toString() << "	"
+                   << query->value(40).toString() << "	"
+                   << query->value(41).toString() << "	"
+                   << query->value(42).toString() << "	"
+                   << query->value(43).toString() << "	"
+                   << query->value(44).toString() << "\r\n";
+        }
+        file->close();
+    }
+    query->~QSqlQuery();
+    _db.close();
+    _db.~QSqlDatabase();
+    _db.removeDatabase(_db.connectionName());
+}
+
+/*--Методы, связанные с графиками--*/
 
 void MainWindow::on_pbSetChart_clicked() {
     QSqlDatabase::database("chartConnection").close();
@@ -823,196 +1207,6 @@ void MainWindow::on_pbDeleteChart_clicked() {
     emit clearChart();
 }
 
-void MainWindow::on_pbSaveFile_clicked() {
-    if (fileNameShort == "") {
-        return;
-    }
-    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBToFile");
-    _db.setDatabaseName(QDir::currentPath() + "/databases/" + fileNameShort +
-                        ".sqlite");
-    _db.open();
-    QSqlQuery *query = new QSqlQuery(_db);
-    QString strSelect = "SELECT * FROM DataTable";
-    if (!query->exec(strSelect)) {
-    }
-    //"	" - табуляция
-    int i = 0;
-    QString fileName =
-        QDateTime::currentDateTime().date().toString(Qt::ISODate) + "_" +
-        QString::number(QTime::currentTime().hour()) + "-" +
-        QString::number(QTime::currentTime().minute()) + "-" +
-        QString::number(QTime::currentTime().second()) + ".txt";
-    QFile *file = new QFile(fileName);
-    if (file->open(QIODevice::WriteOnly)) {
-        QTextStream stream(file);
-        stream << "	" << "NAV="  << "	"
-               << "nNavCounter" << "	"
-               << "sns_utc" << "	"
-               << "snd_utc" << "	"
-               << "V_X" << "	"
-               << "V_Y" << "	"
-               << "V_Z" << "	"
-               << "Vair" << "	"
-               << "roll" << "	"
-               << "pitch" << "	"
-               << "head" << "	"
-               << "head_magn" << "	"
-               << "B" << "	"
-               << "L" << "	"
-               << "h" << "	"
-               << "Wx" << "	"
-               << "Wy" << "	"
-               << "Wz" << "	"
-               << "alfa" << "	"
-               << "beta" << "	"
-               << "H_baro" << "	"
-               << "Pst" << "	"
-               << "Tnv" << "	"
-               << "Nx" << "	"
-               << "Ny" << "	"
-               << "Nz" << "	"
-               << "coarse" << "	"
-               << "WindDir" << "	"
-               << "WindV" << "	"
-               << "op_ns" << "	"
-               << "op_ver" << "	"
-               << "np_ns" << "	"
-               << "np_ver" << "	"
-               << "np_num" << "	"
-               << "align_time" << "	"
-               << "nav_mode" << "	"
-               << "nUDPCounter" << "	"
-               << "unix_time" << "	"
-               << "work_time" << "	"
-               << "priority" << "	"
-               << "gps_glo" << "	"
-               << "sns_mode" << "	"
-               << "sns_cmd" << "	"
-               << "pni_bits" << "	"
-               << "fix_bits" << "	"
-               << "recv_status" << "\r\n"
-               ;
-
-        while (query->next()) {
-            ++i;
-            stream << i << "	"
-                   << "NAV=" << "	"
-                   << query->value(0).toString() << "	"
-                   << query->value(1).toString() << "	" << "	"
-                   << query->value(2).toString() << "	"
-                   << query->value(3).toString() << "	"
-                   << query->value(4).toString() << "	"
-                   << query->value(5).toString() << "	"
-                   << query->value(6).toString() << "	"
-                   << query->value(7).toString() << "	"
-                   << query->value(8).toString() << "	"
-                   << query->value(9).toString() << "	"
-                   << query->value(10).toString() << "	"
-                   << query->value(11).toString() << "	"
-                   << query->value(12).toString() << "	"
-                   << query->value(13).toString() << "	"
-                   << query->value(14).toString() << "	"
-                   << query->value(15).toString() << "	"
-                   << query->value(16).toString() << "	"
-                   << query->value(17).toString() << "	"
-                   << query->value(18).toString() << "	"
-                   << query->value(19).toString() << "	"
-                   << query->value(20).toString() << "	"
-                   << query->value(21).toString() << "	"
-                   << query->value(22).toString() << "	"
-                   << query->value(23).toString() << "	"
-                   << query->value(24).toString() << "	"
-                   << query->value(25).toString() << "	"
-                   << query->value(26).toString() << "	"
-                   << query->value(27).toString() << "	"
-                   << query->value(28).toString() << "	"
-                   << query->value(29).toString() << "	"
-                   << query->value(30).toString() << "	"
-                   << query->value(31).toString() << "	"
-                   << query->value(32).toString() << "	"
-                   << query->value(33).toString() << "	"
-                   << query->value(34).toString() << "	"
-                   << query->value(35).toString() << "	"
-                   << query->value(36).toString() << "	"
-                   << query->value(37).toString() << "	"
-                   << query->value(38).toString() << "	"
-                   << query->value(39).toString() << "	"
-                   << query->value(40).toString() << "	"
-                   << query->value(41).toString() << "	"
-                   << query->value(42).toString() << "	"
-                   << query->value(43).toString() << "	"
-                   << query->value(44).toString() << "\r\n";
-        }
-        file->close();
-    }
-    query->~QSqlQuery();
-    _db.close();
-    _db.~QSqlDatabase();
-    _db.removeDatabase(_db.connectionName());
-}
-
-void MainWindow::on_pbDBTableDelete_clicked() {
-    if (ui->tvSqlTable->model() != nullptr) {
-        ui->tvSqlTable->model()->~QAbstractItemModel();
-    }
-    QString connectionName = "dbOpened";
-    QSqlDatabase::database(connectionName).close();
-    QSqlDatabase::removeDatabase(connectionName);
-    QFile::remove("databases/" + fileNameShort +
-                  ".sqlite");
-    QSqlQuery *query = new QSqlQuery(db);
-    QString strDeleteTable = "DELETE FROM MainTable WHERE name = '%1'";
-    strDeleteTable = strDeleteTable.arg(fileNameShort);
-    query->exec(strDeleteTable);
-    query->~QSqlQuery();
-    fileNameShort = "";
-    ui->lblSqlDBSelectedValue->setText("");
-    ui->lblSelectedDBValue->setText("");
-    ui->teDBTableDescription->setText("");
-    ui->pbDbTableChangeDescription->setEnabled(false);
-
-    ui->pbDBTableDelete->setEnabled(false);
-    ui->pbStartStatsWindow->setEnabled(false);
-    ui->pbSaveFile->setEnabled(false);
-    ui->pbAddMap->setEnabled(false);
-    ui->pbSetChart->setEnabled(false);
-    ui->pbDeleteChart->setEnabled(false);
-}
-
-void MainWindow::on_sbMapCoordDensityValue_valueChanged(double arg1) {
-    if (arg1 >= 301 && arg1 <= 500) {
-        ui->lblMapCoordDensityWarning->setText(
-            "Для лучшего качества уменьшите значение параметра");
-        ui->lblMapCoordDensityWarning->setStyleSheet("color: orange; font: 10pt \"Century Gothic\";");
-    }else
-        if(arg1 >= 501 && arg1 <=1000){
-        ui->lblMapCoordDensityWarning->setText("Рекомендуется уменьшить значение параметра");
-        ui->lblMapCoordDensityWarning->setStyleSheet("color: red; font: 10pt \"Century Gothic\";");
-    } else
-        if(arg1>=1001) {
-        ui->lblMapCoordDensityWarning->setText("Веротна возможность неверного отображения");
-        ui->lblMapCoordDensityWarning->setStyleSheet("color: darkred; font: 10pt \"Century Gothic\";");
-    } else{
-        ui->lblMapCoordDensityWarning->setText("");
-    }
-
-    if (arg1 >= 300) {
-        ui->chbMapCirclesDrawing->setEnabled(true);
-    } else {
-        ui->chbMapCirclesDrawing->setEnabled(false);
-    }
-}
-
-void MainWindow::on_pbDbTableChangeDescription_clicked() {
-    QString strUpdate =
-        "UPDATE MainTable SET description = '%1' WHERE name == '%2'";
-    strUpdate = strUpdate.arg(ui->teDBTableDescription->toPlainText())
-                    .arg(fileNameShort);
-    QSqlQuery *query = new QSqlQuery(db);
-    query->exec(strUpdate);
-    query->~QSqlQuery();
-}
-
 void MainWindow::on_cbChartRow_currentIndexChanged(int index) {
     if (ui->chbChartFixAxisX->isEnabled()) {
         fixAxisXWasChecked = ui->chbChartFixAxisX->isChecked();
@@ -1052,193 +1246,6 @@ void MainWindow::on_chbChartUseOptimization_stateChanged(int arg1)
     } else {
         ui->lblChartOptimizationsWarning->setVisible(false);
     }
-}
-
-void MainWindow::installOSMPlugin() {
-    QStringList list;
-    list << "Стандартный"
-         << "Велосипед"
-         << "Обществ. транспорт"
-         << "Ночной транспорт"
-         << "Местность"
-         << "Туризм";
-    emit setMapPlugin("osm");
-    ui->cbMapDPISelection->setEnabled(true);
-    ui->cbMapType->addItems(list);
-    ui->cbMapSelection->setEnabled(false);
-    ui->pbMapDPISelectionAccept->setEnabled(true);
-    ui->pbMapSelectionAccept->setEnabled(false);
-}
-
-void MainWindow::installESRIPlugin() {
-    QStringList list;
-    list << "Стандартный"
-         << "Спутник"
-         << "Базовая местность"
-         << "Топография"
-         << "Топография США"
-         << "Национальная"
-         << "Светло-серый холст"
-         << "Физическая"
-         << "Затененный рельеф"
-         << "Мировой океан"
-         << "Темно-серый холст"
-         << "Карта Делорм";
-    emit setMapPlugin("esri");
-    ui->cbMapType->addItems(list);
-    ui->cbMapSelection->setEnabled(false);
-    ui->pbMapSelectionAccept->setEnabled(false);
-    ui->cbMapDPISelection->setEnabled(false);
-    ui->cbMapDPISelection->clear();
-    ui->cbMapDPISelection->addItem("ESRI");
-    ui->cbMapType->setEnabled(true);
-    if (fileNameShort != "") {
-        ui->pbAddMap->setEnabled(true);
-    }
-    ui->pbClearMap->setEnabled(true);
-}
-
-void MainWindow::on_pbMapDrawingColorSelection_clicked() {
-    QColorDialog colorDialog;
-    colorDialog.show();
-    colorDialog.exec();
-    if (colorDialog.result()) {
-        QPalette palette;
-        palette.setColor(ui->wMapDrawingColorDisplay->backgroundRole(),
-                         colorDialog.currentColor());
-        ui->wMapDrawingColorDisplay->setPalette(palette);
-    }
-    emit setMapLineColor(colorDialog.currentColor());
-    colorDialog.close();
-}
-
-void MainWindow::on_sbMapDrawingWidthValue_valueChanged(double arg1) {
-    emit setMapLineWidth(qFloor(arg1));
-}
-
-void MainWindow::on_pbMapSelectionAccept_clicked() {
-    ui->qwMap->setSource(QUrl("qrc:/map.qml"));
-    ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    engine = ui->qwMap->engine();
-    context = engine->rootContext();
-    context->setContextProperty(QStringLiteral("main"), this);
-    setMapInfo(56.394, 61.9334, 12);
-    emit setMapOfflineDirectory(QDir::currentPath() + "/offline_tiles/");
-    if (ui->cbMapSelection->currentText() == "OpenStreetMap") {
-        installOSMPlugin();
-    } else {
-        installESRIPlugin();
-    }
-}
-
-void MainWindow::on_pbMapDPISelectionAccept_clicked() {
-
-
-    ui->cbMapDPISelection->setEnabled(false);
-    ui->pbMapDPISelectionAccept->setEnabled(false);
-    if (fileNameShort != ""){
-        ui->pbAddMap->setEnabled(true);
-    }
-    ui->cbMapType->setEnabled(true);
-    ui->pbClearMap->setEnabled(true);
-    if (ui->cbMapDPISelection->currentText() == "Высокое") {
-        emit setMapHighDPI(true);
-    } else {
-        emit setMapHighDPI(false);
-    }
-}
-
-void MainWindow::on_pbMapCircleBorderColor_clicked() {
-    QColorDialog colorDialog;
-    colorDialog.show();
-    colorDialog.exec();
-    if (colorDialog.result()) {
-        QPalette palette;
-        palette.setColor(ui->wMapCircleBorderColorDisplay->backgroundRole(),
-                         colorDialog.currentColor());
-        ui->wMapCircleBorderColorDisplay->setPalette(palette);
-        palette.~QPalette();
-    }
-
-    emit setMapCircleBorderColor(colorDialog.currentColor());
-    colorDialog.close();
-}
-
-void MainWindow::on_sbMapCircleBorderWidth_valueChanged(int arg1) {
-    emit setMapCircleBorderWidth(arg1);
-}
-
-
-void MainWindow::on_sbMapCircleRadius_valueChanged(int arg1) {
-    emit setMapCircleRadius(arg1);
-}
-
-void MainWindow::on_pbMapCircleColor_clicked() {
-    QColorDialog colorDialog;
-    colorDialog.show();
-    colorDialog.exec();
-    if (colorDialog.result()) {
-        QPalette palette;
-        palette.setColor(ui->wMapCircleColorDisplay->backgroundRole(),
-                         colorDialog.currentColor());
-        ui->wMapCircleColorDisplay->setPalette(palette);
-        palette.~QPalette();
-    }
-    emit setMapCircleColor(colorDialog.currentColor());
-    colorDialog.close();
-}
-
-void MainWindow::on_chbMapCirclesDrawing_stateChanged(int arg1)
-{
-    if (arg1 == 2) {
-        ui->pbMapCircleBorderColor->setEnabled(true);
-        ui->pbMapCircleColor->setEnabled(true);
-        ui->sbMapCircleBorderWidth->setEnabled(true);
-        ui->sbMapCircleRadius->setEnabled(true);
-    } else {
-        ui->pbMapCircleBorderColor->setEnabled(false);
-        ui->pbMapCircleColor->setEnabled(false);
-        ui->sbMapCircleBorderWidth->setEnabled(false);
-        ui->sbMapCircleRadius->setEnabled(false);
-    }
-}
-
-void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
-    if (ui->tvSqlTable->model() != nullptr) {
-        ui->tvSqlTable->model()->~QAbstractItemModel();
-    }
-    QString fileName = index.siblingAtColumn(0).data().toString();
-    fileNameShort = fileName.split(".")[0];
-    QString connectionName = "dbOpened";
-    QSqlDatabase::database(connectionName).close();
-    QSqlDatabase::removeDatabase(connectionName);
-
-    ui->pbStartStatsWindow->setText("Открыть статистику");
-
-    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-    _db.setDatabaseName("databases/" + fileName);
-    _db.open();
-
-    QString strSelect = "SELECT * FROM MainTable WHERE name = '%1'";
-    strSelect = strSelect.arg(fileNameShort);
-    QSqlQuery *query = new QSqlQuery(db);
-    query->exec(strSelect);
-    query->first();
-    ui->lblSqlDBSelectedValue->setText(fileNameShort);
-    ui->lblSelectedDBValue->setText(fileNameShort);
-    ui->teDBTableDescription->setText(query->value(1).toString());
-    ui->pbDbTableChangeDescription->setEnabled(true);
-    //
-    if (ui->qwMap->source() != QUrl(nullptr)){
-    ui->pbAddMap->setEnabled(true);
-    ui->pbClearMap->setEnabled(true);
-    }
-    ui->pbDBTableDelete->setEnabled(true);
-    ui->pbStartStatsWindow->setEnabled(true);
-    ui->pbSaveFile->setEnabled(true);
-    ui->pbSetChart->setEnabled(true);
-    ui->pbDeleteChart->setEnabled(true);
-    openTable(_db);
 }
 
 void MainWindow::on_pbChartPenColorSelection_clicked() {

@@ -7,7 +7,6 @@ Chart::Chart(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     setTitle("Blank chart");
     setAnimationOptions(QChart::SeriesAnimations);
     setDropShadowEnabled(false);
-
 }
 
 void Chart::clearChart() {
