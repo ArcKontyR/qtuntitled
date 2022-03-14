@@ -1,4 +1,4 @@
-QT       += core gui sql charts qml quickwidgets concurrent
+QT       += core gui sql charts qml quickwidgets concurrent datavisualization
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 lessThan(QT_MAJOR_VERSION, 6): QT += location
@@ -12,16 +12,20 @@ SOURCES += \
     chart.cpp \
     chartview.cpp \
     filedialog.cpp \
+    geotranslator.cpp \
     main.cpp \
     mainwindow.cpp \
-    statisticswindow.cpp
+    statisticswindow.cpp \
+    tdchart.cpp
 
 HEADERS += \
     chart.h \
     chartview.h \
     filedialog.h \
+    geotranslator.h \
     mainwindow.h \
-    statisticswindow.h
+    statisticswindow.h \
+    tdchart.h
 
 FORMS += \
     mainwindow.ui \

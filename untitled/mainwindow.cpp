@@ -3,6 +3,7 @@
 #include "chart.h"
 #include "filedialog.h"
 #include "statisticswindow.h"
+#include "tdchart.h"
 #include <QtSql>
 #include <QtCharts/QChart>
 #include <QQmlApplicationEngine>
@@ -12,6 +13,9 @@
 #include <QFuture>
 #include <QFutureWatcher>
 
+#include <QtDataVisualization>
+using namespace QtDataVisualization;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
       , ui(new Ui::MainWindow)
@@ -19,6 +23,33 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     connectSignals();
     setFont(QFont("Century Gothic",10));
+
+    thirdDimChart = new Q3DScatter();
+    QWidget *container = QWidget::createWindowContainer(thirdDimChart);
+    container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QLayoutItem *item = ui->glTDChart->replaceWidget(
+        ui->glTDChart->itemAtPosition(0, 0)->widget(), container);
+    item->widget()->~QWidget();
+    item->~QLayoutItem();
+
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Точка"),
+                                    int(QAbstract3DSeries::MeshPoint));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Куб"),
+                           int(QAbstract3DSeries::MeshCube));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Сфера"),
+                                    int(QAbstract3DSeries::MeshSphere));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Треугольная пирамида"),
+                           int(QAbstract3DSeries::MeshMinimal));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Пирамида"),
+                                    int(QAbstract3DSeries::MeshPyramid));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Конус"),
+                                    int(QAbstract3DSeries::MeshCone));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Цилиндр"),
+                                    int(QAbstract3DSeries::MeshCylinder));
+    ui->cbTDChartMeshValue->addItem(QStringLiteral("Стрелка"),
+                                    int(QAbstract3DSeries::MeshArrow));
+    ui->cbTDChartMeshValue->setCurrentIndex(0);
 
     /*--Отключение временных виджетов--*/
     ui->lblChartOptimizationsWarning->setVisible(false);
@@ -234,6 +265,77 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/*--Методы, связанные с 3D графиком--*/
+
+void MainWindow::createTDChart() {
+    if (fileNameShort.isEmpty()) {
+        return;
+    }
+    ui->pbTDChartLabelStyle->disconnect();
+    ui->cbTDChartMeshValue->disconnect();
+    ui->cbTDChartShadowQualityValue->disconnect();
+    ui->cbTDChartShowBackground->disconnect();
+    ui->cbTDChartShowGrid->disconnect();
+    ui->cbTDChartSmooth->disconnect();
+    ui->cbTDChartStyleValue->disconnect();
+    ui->sbTDChartDensity->disconnect();
+
+    TDChart *modifier = new TDChart(thirdDimChart);
+
+    connect(ui->pbTDChartLabelStyle, &QPushButton::clicked, modifier,
+            &TDChart::changeLabelStyle);
+    connect(ui->cbTDChartShowBackground, &QCheckBox::stateChanged, modifier,
+            &TDChart::setBackgroundEnabled);
+    connect(ui->cbTDChartShowGrid, &QCheckBox::stateChanged, modifier,
+            &TDChart::setGridEnabled);
+    connect(ui->cbTDChartSmooth, &QCheckBox::stateChanged, modifier,
+            &TDChart::setSmoothDots);
+    connect(ui->cbTDChartMeshValue, SIGNAL(currentIndexChanged(int)), modifier,
+            SLOT(changeStyle(int)));
+    connect(ui->cbTDChartStyleValue, SIGNAL(currentIndexChanged(int)), modifier,
+            SLOT(changeTheme(int)));
+    connect(ui->cbTDChartShadowQualityValue, SIGNAL(currentIndexChanged(int)),
+            modifier, SLOT(changeShadowQuality(int)));
+    connect(modifier, SIGNAL(pointCountChanged(int)), this,
+            SLOT(changeTDChartPointCount(int)));
+    connect(modifier, SIGNAL(averageLatitudeChanged(double)), this,
+            SLOT(changeTDChartAverageLatitude(double)));
+    connect(modifier, SIGNAL(averageLongitudeChanged(double)), this,
+            SLOT(changeTDChartAverageLongitude(double)));
+    connect(ui->sbTDChartDensity, SIGNAL(valueChanged(int)), modifier,
+            SLOT(setDensity(int)));
+    connect(thirdDimChart, &Q3DScatter::shadowQualityChanged, modifier,
+            &TDChart::shadowQualityUpdatedByVisual);
+
+    modifier->setFileName(fileNameShort);
+    modifier->initiate();
+    emit ui->sbTDChartDensity->valueChanged(ui->sbTDChartDensity->value());
+    emit ui->cbTDChartShadowQualityValue->currentIndexChanged(
+        ui->cbTDChartShadowQualityValue->currentIndex());
+    emit ui->cbTDChartStyleValue->currentIndexChanged(
+        ui->cbTDChartStyleValue->currentIndex());
+    emit ui->cbTDChartMeshValue->currentIndexChanged(
+        ui->cbTDChartMeshValue->currentIndex());
+    emit ui->cbTDChartSmooth->stateChanged(
+        ui->cbTDChartSmooth->checkState());
+    emit ui->cbTDChartShowGrid->stateChanged(
+        ui->cbTDChartShowGrid->checkState());
+    emit ui->cbTDChartShowBackground->stateChanged(
+        ui->cbTDChartShowBackground->checkState());
+}
+
+void MainWindow::changeTDChartPointCount(int _count) {
+    ui->lblTDChartPointCountValue->setText(QString::number(_count));
+}
+
+void MainWindow::changeTDChartAverageLatitude(double _avgLat) {
+    ui->lblTDChartAverageLatitudeValue->setText(QString::number(_avgLat));
+}
+
+void MainWindow::changeTDChartAverageLongitude(double _avgLon) {
+    ui->lblTDChartAverageLongitudeValue->setText(QString::number(_avgLon));
+}
+
 /*--Методы, связанные с картами--*/
 
 void MainWindow::clearMapFromPath() {
@@ -321,7 +423,6 @@ void MainWindow::setMapPath() {
 
 void MainWindow::on_pbAddMap_clicked() {
     ui->pbAddMap->setEnabled(false);
-    //setMapPath();
     QFuture<void> future = QtConcurrent::run(this, &MainWindow::setMapPath);
     future.waitForFinished();
     if (future.isFinished()) {
@@ -968,6 +1069,7 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     ui->pbSetChart->setEnabled(true);
     ui->pbDeleteChart->setEnabled(true);
     openTable(_db);
+    createTDChart();
 }
 
 /*--Методы, связанные с выгрузкой данных--*/
