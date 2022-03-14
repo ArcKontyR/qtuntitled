@@ -10,9 +10,6 @@ Item {
         onSetMapCoordinate: {
             mapPolyline.addCoordinate(QtPositioning.coordinate(latitude,
                                                                longitude))
-            //console.log(latitude, longitude)
-            //console.log(_map.mapItems.length,
-            // _map.mapItems[_map.mapItems.length])
         }
         onSetMapCenter: {
             _map.center = QtPositioning.coordinate(latitude, longitude)
@@ -25,14 +22,8 @@ Item {
             console.log(_map.mapItems.length)
             for (var i = _map.mapItems.length - 1; i >= 0; i--) {
                 if (_map.mapItems[i].objectName === "mapCircle") {
-                    // console.log(i, "should be deleted",
-                    //_map.mapItems[i].objectName, _map.mapItems[i])
                     _map.mapItems[i].destroy()
                     _map.removeMapItem(_map.mapItems[i])
-                } else {
-
-                    //console.log(i, "should not be deleted",
-                    //_map.mapItems[i].objectName, _map.mapItems[i])
                 }
             }
         }
@@ -46,15 +37,13 @@ Item {
         }
         onSetMapHighDPI: {
             osmHighDPI.value = value
-            //console.log(osmHighDPI.value, value)
         }
         onSetMapPlugin: {
-            if (plugin == "esri") {
+            if (plugin === "esri") {
                 _map.plugin = esriMapPlugin
             } else {
                 _map.plugin = osmMapPlugin
             }
-            //console.log(plugin, _map.plugin)
         }
         onSetMapLineColor: {
             mapPolyline.line.color = color
@@ -62,7 +51,6 @@ Item {
         onSetMapLineWidth: {
             mapPolyline.line.width = width
         }
-
         onSetMapCircleCoordinate: {
             circle = Qt.createQmlObject('import QtLocation 5.15; MapCircle {}',
                                         _map)
@@ -151,13 +139,6 @@ Item {
             path: []
         }
 
-
-        /*MapCircle {
-            id: mapCoordCircle
-            objectName: "mapCoordCircle"
-            radius: mapPolyline.line.width + 4
-            color: mapPolyline.line.color
-        }*/
         onCenterChanged: {
             main.setMapInfo(_map.center.latitude, _map.center.longitude,
                             _map.zoomLevel)

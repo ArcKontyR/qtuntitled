@@ -82,8 +82,180 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
+        <widget class="QWidget" name="tabDB">
+         <property name="contextMenuPolicy">
+          <enum>Qt::PreventContextMenu</enum>
+         </property>
+         <attribute name="title">
+          <string>База</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="2" column="2">
+             <widget class="QLabel" name="lblSqlDBSelectedValue">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="12">
+             <widget class="QTableView" name="tvSqlTable">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBSave">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Выбрать и сохранить файл в базу</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QTextEdit" name="teDBTableDescription"/>
+            </item>
+            <item row="11" column="1" colspan="2">
+             <widget class="QLabel" name="lblErrorWarning">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblSqlSelected">
+              <property name="text">
+               <string>Выбрано:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="2">
+             <widget class="QProgressBar" name="prbrDBSave">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="format">
+               <string>%p%</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QPushButton" name="pbStartStatsWindow">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Открыть статистику</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" rowspan="2" colspan="2">
+             <widget class="QTreeView" name="tvDatabases">
+              <property name="minimumSize">
+               <size>
+                <width>280</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QLabel" name="lblDBTableDescription">
+              <property name="text">
+               <string>Описание</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="2">
+             <widget class="QPushButton" name="pbSaveFile">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Сохранить данные базы в файл</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDBTableDelete">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Удалить базу</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="QPushButton" name="pbDbTableChangeDescription">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Изменить описание</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="tabMap">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -1205,171 +1377,261 @@ font: 10pt &quot;Century Gothic&quot;;</string>
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tabDB">
-         <property name="contextMenuPolicy">
-          <enum>Qt::PreventContextMenu</enum>
-         </property>
+        <widget class="QWidget" name="tabTDChart">
          <attribute name="title">
-          <string>База</string>
+          <string>3D график</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_8">
+         <layout class="QGridLayout" name="gridLayout_10">
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout">
-            <item row="2" column="2">
-             <widget class="QLabel" name="lblSqlDBSelectedValue">
+           <layout class="QGridLayout" name="glTDChart">
+            <item row="8" column="1">
+             <widget class="QLabel" name="lblTDChartDensity">
               <property name="text">
-               <string>-</string>
+               <string>Плотность точек</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="0" rowspan="12">
-             <widget class="QTableView" name="tvSqlTable">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
+            <item row="5" column="2">
+             <widget class="QComboBox" name="cbTDChartStyleValue">
+              <property name="currentIndex">
+               <number>5</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Qt</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Основные цвета</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Digia</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Каменный мох</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Армейско-синяя</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Ретро</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Темная</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Изабелла</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="11" column="1" colspan="2">
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="4" column="2">
+             <widget class="QComboBox" name="cbTDChartMeshValue">
+              <property name="currentIndex">
+               <number>-1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QLabel" name="lblTDChartPointCount">
+              <property name="text">
+               <string>Отрисовано точек</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2">
+             <widget class="QLabel" name="lblTDChartPointCountValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="2">
+             <widget class="QLabel" name="lblTDChartAverageLatitudeValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QCheckBox" name="cbTDChartShowGrid">
+              <property name="text">
+               <string>Отображать сетку</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="2">
+             <widget class="QSpinBox" name="sbTDChartDensity">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>99999</number>
+              </property>
+              <property name="value">
+               <number>100</number>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="2">
+             <widget class="QLabel" name="lblTDChartAverageLongitudeValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="2">
+             <widget class="QComboBox" name="cbTDChartShadowQualityValue">
+              <item>
+               <property name="text">
+                <string>Нет</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Низкое</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Среднее</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Высокое</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Мягко низкое</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Мягко среднее</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Мягко высокое</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLabel" name="lblTDChartStyle">
+              <property name="text">
+               <string>Тема графика</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QPushButton" name="pbTDChartLabelStyle">
+              <property name="text">
+               <string>Изменить стиль надписей</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QCheckBox" name="cbTDChartShowBackground">
+              <property name="text">
+               <string>Отображать фон</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1">
+             <widget class="QLabel" name="lblTDChartAverageLongitude">
+              <property name="text">
+               <string>Долгота, центр рассчета</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLabel" name="lblTDChartMesh">
+              <property name="text">
+               <string>Стиль точек</string>
               </property>
              </widget>
             </item>
             <item row="3" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDBSave">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
+             <widget class="QCheckBox" name="cbTDChartSmooth">
               <property name="text">
-               <string>Выбрать и сохранить файл в базу</string>
+               <string>Сглаживание</string>
               </property>
-              <property name="checkable">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1" colspan="2">
-             <widget class="QTextEdit" name="teDBTableDescription"/>
-            </item>
-            <item row="11" column="1" colspan="2">
-             <widget class="QLabel" name="lblErrorWarning">
-              <property name="enabled">
+              <property name="checked">
                <bool>true</bool>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QLabel" name="lblTDChartShadowQuality">
+              <property name="text">
+               <string>Качество теней</string>
               </property>
-              <property name="styleSheet">
-               <string notr="true"/>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QLabel" name="lblTDChartAverageLatitude">
+              <property name="text">
+               <string>Широта, центр рассчета</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" rowspan="12">
+             <widget class="QLabel" name="lblTDChartWarning">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
               </property>
               <property name="text">
-               <string/>
+               <string>Выберите базу для отображения графика.</string>
               </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="lblSqlSelected">
-              <property name="text">
-               <string>Выбрано:</string>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
-             </widget>
-            </item>
-            <item row="10" column="1" colspan="2">
-             <widget class="QProgressBar" name="prbrDBSave">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="value">
-               <number>0</number>
-              </property>
-              <property name="textVisible">
-               <bool>true</bool>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="format">
-               <string>%p%</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1" colspan="2">
-             <widget class="QPushButton" name="pbStartStatsWindow">
-              <property name="enabled">
+              <property name="wordWrap">
                <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Открыть статистику</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" rowspan="2" colspan="2">
-             <widget class="QTreeView" name="tvDatabases">
-              <property name="minimumSize">
-               <size>
-                <width>280</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1" colspan="2">
-             <widget class="QLabel" name="lblDBTableDescription">
-              <property name="text">
-               <string>Описание</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1" colspan="2">
-             <widget class="QPushButton" name="pbSaveFile">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Сохранить данные базы в файл</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDBTableDelete">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Удалить базу</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1" colspan="2">
-             <widget class="QPushButton" name="pbDbTableChangeDescription">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Изменить описание</string>
               </property>
              </widget>
             </item>
