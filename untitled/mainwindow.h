@@ -8,6 +8,7 @@
 #include <QtCharts>
 #include <QtCore/QTimer>
 #include <QtQuickWidgets/QQuickWidget>
+#include <QtDataVisualization>
 struct BpiData
 {
     char hdr[4];            //!< Заголовок при записи в файл BIV=
@@ -62,7 +63,7 @@ struct BpiData
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
+using namespace QtDataVisualization;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -76,8 +77,8 @@ public:
 
 private:
      Ui::MainWindow *ui;
-    QGraphicsScene *scene;
-    //QQuickWidget* m_quickWidget;
+     //QGraphicsScene *scene;
+     Q3DScatter *thirdDimChart;
     StatisticsWindow *statsWindow;
     QString fileName;
     QString fileNameShort;
@@ -157,6 +158,10 @@ public slots:
     void startStatsWindow(bool);
     void finishStatsWindow();
 
+    void createTDChart();
+    void changeTDChartAverageLatitude(double avgLat);
+    void changeTDChartAverageLongitude(double avgLon);
+
 signals:
     void setMapPlugin(QString plugin);
     void setMapCoordinate(double latitude, double longitude);
@@ -230,6 +235,8 @@ private slots:
 
     void on_tvDatabases_doubleClicked(const QModelIndex &index);
     void on_pbStartStatsWindow_clicked();
+
+    void changeTDChartPointCount(int _count);
 };
 
 #endif // MAINWINDOW_H
