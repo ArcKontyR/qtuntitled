@@ -6,7 +6,6 @@
 #include <QtMath>
 #include <QGeoCoordinate>
 using namespace QtDataVisualization;
-//using namespace std::chrono;
 
 TDChart::TDChart(Q3DScatter *scatter)
     : graph(scatter), fontSize(40.0f),
@@ -16,7 +15,8 @@ TDChart::TDChart(Q3DScatter *scatter)
 void TDChart::setDensity(int _density) {
     density = _density;
     graph->seriesList().at(0)->dataProxy()->resetArray(nullptr);
-    addData();}
+    addData();
+}
 
 void TDChart::setNumberOfRows(int _rows) { rowsCount = _rows; }
 
