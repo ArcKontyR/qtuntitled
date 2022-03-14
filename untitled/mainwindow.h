@@ -77,7 +77,6 @@ public:
 
 private:
      Ui::MainWindow *ui;
-     //QGraphicsScene *scene;
      Q3DScatter *thirdDimChart;
     StatisticsWindow *statsWindow;
     QString fileName;

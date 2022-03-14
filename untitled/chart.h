@@ -12,7 +12,6 @@ public:
     Chart(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
 
 public slots:
-    void setDatabase(QSqlDatabase);
     void setPen(QPen);
     void drawPoint(qreal, qreal);
     void chartIsIndex(bool isIndex = false);
@@ -33,7 +32,6 @@ public slots:
 
     QDateTime calculateTime(qreal);
 private:
-    QSqlDatabase db;
     QString tableName;
     QPen pen;
     QLineSeries *m_series = new QLineSeries;

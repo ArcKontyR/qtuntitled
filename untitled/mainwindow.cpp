@@ -1058,7 +1058,6 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     ui->lblSelectedDBValue->setText(fileNameShort);
     ui->teDBTableDescription->setText(query->value(1).toString());
     ui->pbDbTableChangeDescription->setEnabled(true);
-    //
     if (ui->qwMap->source() != QUrl(nullptr)){
         ui->pbAddMap->setEnabled(true);
         ui->pbClearMap->setEnabled(true);
@@ -1205,19 +1204,13 @@ void MainWindow::on_pbSaveFile_clicked() {
 /*--Методы, связанные с графиками--*/
 
 void MainWindow::on_pbSetChart_clicked() {
-    QSqlDatabase::database("chartConnection").close();
-    QSqlDatabase::removeDatabase("chartConnection");
     if (fileNameShort.isEmpty()) {
         return;
     }
-    //QSqlDatabase::database("chartConnection").close();
-    //QSqlDatabase::removeDatabase("chartConnection");
     Chart *chart = new Chart();
     connect(this, SIGNAL(drawChart()), chart, SLOT(compute()));
     connect(this, SIGNAL(setChartTableName(QString)), chart,
             SLOT(setTableName(QString)));
-    connect(this, SIGNAL(setChartDatabase(QSqlDatabase)), chart,
-            SLOT(setDatabase(QSqlDatabase)));
     connect(this, SIGNAL(setChartFixXChecked(bool)), chart,
             SLOT(setFixXChecked(bool)));
     connect(this, SIGNAL(setChartFixYChecked(bool)), chart,
@@ -1251,12 +1244,7 @@ void MainWindow::on_pbSetChart_clicked() {
     connect(this, SIGNAL(setChartPen(QPen)), chart, SLOT(setPen(QPen)));
     connect(this, SIGNAL(setChartTheme(int)), chart, SLOT(setChartTheme(int)));
 
-
-
-    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "chartConnection");
-    _db.setDatabaseName(QDir::currentPath()+"/databases/"+fileNameShort+".sqlite");
-    _db.open();
-    emit setChartDatabase(_db);
+    emit setChartTableName(fileNameShort);
     emit setChartFixXChecked(ui->chbChartFixAxisX->isChecked());
     emit setChartFixYChecked(ui->chbChartFixAxisY->isChecked());
     emit setChartDBRow(structListVarX.at(ui->cbChartRow->currentIndex()));

@@ -60,7 +60,6 @@ void Chart::setTableName(QString _tableName) {
     if (tableName != _tableName)
         tableName = _tableName;
 }
-void Chart::setDatabase(QSqlDatabase _db) { db = _db; }
 void Chart::setUseOptimization(bool _useOpt) { useOptimization = _useOpt; }
 void Chart::setUseAltOptimization(bool _useAltOpt) { useAltOptimization = _useAltOpt; }
 void Chart::setAODensity(int _aoDensity) { aoDensity = _aoDensity; }
@@ -84,7 +83,13 @@ void Chart::isCoordLimit(qreal _y, qreal _yLim) {
 
 void Chart::compute() {
     clearChart();
-    QSqlQuery *query = new QSqlQuery(db);
+    if (QSqlDatabase::connectionNames().contains("chartConnection")) {
+        QSqlDatabase::removeDatabase("chartConnection");
+    }
+    QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "chartConnection");
+    _db.setDatabaseName("databases/"+tableName+".sqlite");
+    _db.open();
+    QSqlQuery *query = new QSqlQuery(_db);
 
     int points = 0;
     int truePoints = 0;
@@ -222,6 +227,7 @@ void Chart::compute() {
     emit setPointsValue(points);
     emit setDrawingProgressDisabled();
     query->~QSqlQuery();
+    _db.close();
 }
 
 QDateTime Chart::calculateTime(qreal _time) {

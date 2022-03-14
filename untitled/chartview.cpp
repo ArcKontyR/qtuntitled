@@ -23,7 +23,6 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)
 {
-    // pan the chart with a middle mouse drag
     if (event->buttons() & Qt::MiddleButton)
     {
         auto dPos = event->pos() - m_lastMousePos;
