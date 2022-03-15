@@ -1090,7 +1090,7 @@ void MainWindow::on_pbSaveFile_clicked() {
         QDateTime::currentDateTime().date().toString(Qt::ISODate) + "_" +
         QString::number(QTime::currentTime().hour()) + "-" +
         QString::number(QTime::currentTime().minute()) + "-" +
-        QString::number(QTime::currentTime().second()) + ".txt";
+        QString::number(QTime::currentTime().second()) + ".csv";
     QFile *file = new QFile(fileName);
     if (file->open(QIODevice::WriteOnly)) {
         QTextStream stream(file);
@@ -1149,9 +1149,9 @@ void MainWindow::on_pbSaveFile_clicked() {
                    << "	";
             for (int j = 0; j < 45; j++) {
                 stream << query->value(j).toString() << "	";
-                if (j == 1) {
-                    stream << "	";
-                }
+//                if (j == 1) {
+//                    stream << "	";
+//                }
             }
             stream << "\r\n";
         }
