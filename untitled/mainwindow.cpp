@@ -235,7 +235,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::updateFilePath() {
     /*--Очистка главной базы от записей несуществующих баз--*/
-    if (!QFile(QDir::currentPath() + "/databases/" + fileNameShort + ".sqlite")
+    if (!QFile("databases/" + fileNameShort + ".sqlite")
              .exists()) {
         on_pbDBTableDelete_clicked();
     }
@@ -560,11 +560,10 @@ void MainWindow::on_sbMapDrawingWidthValue_valueChanged(double arg1) {
 void MainWindow::on_pbMapSelectionAccept_clicked() {
     ui->qwMap->setSource(QUrl("qrc:/map.qml"));
     ui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    engine = ui->qwMap->engine();
-    context = engine->rootContext();
+    context =ui->qwMap->engine()->rootContext();
     context->setContextProperty(QStringLiteral("main"), this);
     setMapInfo(56.394, 61.9334, 12);
-    emit setMapOfflineDirectory(QDir::currentPath() + "/offline_tiles/");
+    emit setMapOfflineDirectory("offline_tiles/");
     if (ui->cbMapSelection->currentText() == "OpenStreetMap") {
         installOSMPlugin();
     } else {
@@ -1078,7 +1077,7 @@ void MainWindow::on_pbSaveFile_clicked() {
         return;
     }
     QSqlDatabase _db = QSqlDatabase::addDatabase("QSQLITE", "DBToFile");
-    _db.setDatabaseName(QDir::currentPath() + "/databases/" + fileNameShort +
+    _db.setDatabaseName("databases/" + fileNameShort +
                         ".sqlite");
     _db.open();
     QSqlQuery *query = new QSqlQuery(_db);
@@ -1146,52 +1145,15 @@ void MainWindow::on_pbSaveFile_clicked() {
         while (query->next()) {
             ++i;
             stream << i << "	"
-                   << "NAV=" << "	"
-                   << query->value(0).toString() << "	"
-                   << query->value(1).toString() << "	" << "	"
-                   << query->value(2).toString() << "	"
-                   << query->value(3).toString() << "	"
-                   << query->value(4).toString() << "	"
-                   << query->value(5).toString() << "	"
-                   << query->value(6).toString() << "	"
-                   << query->value(7).toString() << "	"
-                   << query->value(8).toString() << "	"
-                   << query->value(9).toString() << "	"
-                   << query->value(10).toString() << "	"
-                   << query->value(11).toString() << "	"
-                   << query->value(12).toString() << "	"
-                   << query->value(13).toString() << "	"
-                   << query->value(14).toString() << "	"
-                   << query->value(15).toString() << "	"
-                   << query->value(16).toString() << "	"
-                   << query->value(17).toString() << "	"
-                   << query->value(18).toString() << "	"
-                   << query->value(19).toString() << "	"
-                   << query->value(20).toString() << "	"
-                   << query->value(21).toString() << "	"
-                   << query->value(22).toString() << "	"
-                   << query->value(23).toString() << "	"
-                   << query->value(24).toString() << "	"
-                   << query->value(25).toString() << "	"
-                   << query->value(26).toString() << "	"
-                   << query->value(27).toString() << "	"
-                   << query->value(28).toString() << "	"
-                   << query->value(29).toString() << "	"
-                   << query->value(30).toString() << "	"
-                   << query->value(31).toString() << "	"
-                   << query->value(32).toString() << "	"
-                   << query->value(33).toString() << "	"
-                   << query->value(34).toString() << "	"
-                   << query->value(35).toString() << "	"
-                   << query->value(36).toString() << "	"
-                   << query->value(37).toString() << "	"
-                   << query->value(38).toString() << "	"
-                   << query->value(39).toString() << "	"
-                   << query->value(40).toString() << "	"
-                   << query->value(41).toString() << "	"
-                   << query->value(42).toString() << "	"
-                   << query->value(43).toString() << "	"
-                   << query->value(44).toString() << "\r\n";
+                   << "NAV="
+                   << "	";
+            for (int j = 0; j < 45; j++) {
+                stream << query->value(j).toString() << "	";
+                if (j == 1) {
+                    stream << "	";
+                }
+            }
+            stream << "\r\n";
         }
         file->close();
     }

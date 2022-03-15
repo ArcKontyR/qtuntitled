@@ -104,6 +104,14 @@ Item {
             id: osmOfflineDir
             name: "osm.mapping.offline.directory"
         }
+        PluginParameter {
+            name: "osm.mapping.providersrepository.disabled"
+            value: "true"
+        }
+        PluginParameter {
+            name: "osm.mapping.providersrepository.address"
+            value: "http://maps-redirect.qt.io/osm/6.2/"
+        }
     }
 
     Plugin {
