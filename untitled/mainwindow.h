@@ -84,12 +84,10 @@ private:
     int numberOfRows;
     QList<QString> chartTitles;
     QList<QString> chartViewTitles;
-    const QString strTableQuery = "SELECT name FROM sqlite_master WHERE type = 'table'";
     const QString strMainTableCreate = "CREATE TABLE MainTable ("
                                        "name        TEXT,"
                                        "description     TEXT,"
                                        "additionDate     TEXT);";
-    const QString strMainTableSelect = "SELECT * FROM MainTable";
 
     QSqlDatabase db;
 
@@ -104,7 +102,6 @@ private:
 
     static bool createConnection();
 
-    QQmlEngine *engine;
     QQmlContext *context;
 
     QString row;
