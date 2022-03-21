@@ -976,7 +976,6 @@ void MainWindow::on_pbDBSave_clicked() {
     QString shortName = fileName.split("/")[fileName.split("/").size() - 1];
 
     if (QFile("databases/" + shortName + ".sqlite").exists()) {
-        shortName.~QString();
         return;
     }
     QFile *file = new QFile(fileName);
