@@ -258,6 +258,9 @@ void MainWindow::connectSignals() {
 
     connect(this, SIGNAL(open(QSqlDatabase)), this, SLOT(openTable(QSqlDatabase)));
     connect(this, SIGNAL(openStatsWindow(bool)), this, SLOT(startStatsWindow(bool)));
+
+    connect(ui->pbTDChartCreate, SIGNAL(clicked()), this,
+            SLOT(createTDChart()));
 }
 
 MainWindow::~MainWindow()
@@ -957,6 +960,12 @@ void MainWindow::on_pbDBSave_clicked() {
     QString description;
     if (dialog->result()) {
         fileName = dialog->selectedFiles().first();
+        QFileInfo fileInfo(fileName);
+        if (!fileInfo.completeSuffix().isEmpty() || fileInfo.isDir()) {
+            description.~QString();
+            fileInfo.~QFileInfo();
+            return;
+        }
         description = dialog->getDescription();
     } else {
         return;
@@ -964,8 +973,14 @@ void MainWindow::on_pbDBSave_clicked() {
     if (fileName == "") {
         return;
     }
+    QString shortName = fileName.split("/")[fileName.split("/").size() - 1];
+
+    if (QFile("databases/" + shortName + ".sqlite").exists()) {
+        shortName.~QString();
+        return;
+    }
     QFile *file = new QFile(fileName);
-    fileNameShort = fileName.split("/")[fileName.split("/").size() - 1];
+
     dialog->close();
 
     numberOfRows  =  QtConcurrent::run(this, &MainWindow::countInsertQueryRows, file).result();
@@ -1067,7 +1082,7 @@ void MainWindow::on_tvDatabases_doubleClicked(const QModelIndex &index) {
     ui->pbSetChart->setEnabled(true);
     ui->pbDeleteChart->setEnabled(true);
     openTable(_db);
-    createTDChart();
+    //createTDChart();
 }
 
 /*--Методы, связанные с выгрузкой данных--*/
